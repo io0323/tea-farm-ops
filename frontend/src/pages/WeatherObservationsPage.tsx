@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -8,18 +8,69 @@ import {
   Grid,
   Chip,
   CircularProgress,
+  IconButton,
+  CardActions,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { fetchWeatherObservations } from '../store/slices/weatherObservationSlice';
+import { WeatherObservation } from '../types';
+import WeatherObservationForm from '../components/weather-observations/WeatherObservationForm';
+import DeleteWeatherObservationDialog from '../components/weather-observations/DeleteWeatherObservationDialog';
 
 const WeatherObservationsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { weatherObservations, loading } = useAppSelector((state) => state.weatherObservations);
+  
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedObservation, setSelectedObservation] = useState<WeatherObservation | null>(null);
 
   useEffect(() => {
     dispatch(fetchWeatherObservations());
   }, [dispatch]);
+
+  const handleCreate = () => {
+    setSelectedObservation(null);
+    setFormOpen(true);
+  };
+
+  const handleEdit = (observation: WeatherObservation) => {
+    setSelectedObservation(observation);
+    setFormOpen(true);
+  };
+
+  const handleDelete = (observation: WeatherObservation) => {
+    setSelectedObservation(observation);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+    setSelectedObservation(null);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+    setSelectedObservation(null);
+  };
+
+  const getTemperatureColor = (temp: number) => {
+    if (temp >= 30) return 'error';
+    if (temp >= 25) return 'warning';
+    if (temp >= 15) return 'success';
+    return 'info';
+  };
+
+  const getRainfallColor = (rainfall: number) => {
+    if (rainfall >= 50) return 'error';
+    if (rainfall >= 20) return 'warning';
+    return 'info';
+  };
 
   if (loading) {
     return (
@@ -39,6 +90,7 @@ const WeatherObservationsPage: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           size="large"
+          onClick={handleCreate}
         >
           新規観測
         </Button>
@@ -50,27 +102,24 @@ const WeatherObservationsPage: React.FC = () => {
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  {observation.field.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  観測日: {observation.date}
+                  {observation.date}
                 </Typography>
                 
                 <Box display="flex" gap={1} sx={{ mb: 2 }}>
                   <Chip
                     label={`${observation.temperature}°C`}
                     size="small"
-                    color="primary"
+                    color={getTemperatureColor(observation.temperature) as any}
                   />
                   <Chip
                     label={`${observation.rainfall}mm`}
                     size="small"
-                    color="info"
+                    color={getRainfallColor(observation.rainfall) as any}
                   />
                   <Chip
                     label={`${observation.humidity}%`}
                     size="small"
-                    color="secondary"
+                    variant="outlined"
                   />
                 </Box>
 
@@ -86,6 +135,23 @@ const WeatherObservationsPage: React.FC = () => {
                   </Typography>
                 )}
               </CardContent>
+              
+              <CardActions sx={{ justifyContent: 'flex-end' }}>
+                <IconButton
+                  size="small"
+                  onClick={() => handleEdit(observation)}
+                  color="primary"
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDelete(observation)}
+                  color="error"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
             </Card>
           </Grid>
         ))}
@@ -97,10 +163,24 @@ const WeatherObservationsPage: React.FC = () => {
             天候観測が登録されていません
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            新規天候観測を追加してください
+            新規観測を追加してください
           </Typography>
         </Box>
       )}
+
+      {/* フォームダイアログ */}
+      <WeatherObservationForm
+        open={formOpen}
+        onClose={handleFormClose}
+        observation={selectedObservation}
+      />
+
+      {/* 削除確認ダイアログ */}
+      <DeleteWeatherObservationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+        observation={selectedObservation}
+      />
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -8,30 +8,67 @@ import {
   Grid,
   Chip,
   CircularProgress,
+  IconButton,
+  CardActions,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { fetchHarvestRecords } from '../store/slices/harvestRecordSlice';
-import { TeaGrade } from '../types';
+import { HarvestRecord } from '../types';
+import HarvestRecordForm from '../components/harvest-records/HarvestRecordForm';
+import DeleteHarvestRecordDialog from '../components/harvest-records/DeleteHarvestRecordDialog';
 
 const HarvestRecordsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { harvestRecords, loading } = useAppSelector((state) => state.harvestRecords);
+  
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<HarvestRecord | null>(null);
 
   useEffect(() => {
     dispatch(fetchHarvestRecords());
   }, [dispatch]);
 
-  const getGradeColor = (grade: TeaGrade) => {
+  const handleCreate = () => {
+    setSelectedRecord(null);
+    setFormOpen(true);
+  };
+
+  const handleEdit = (record: HarvestRecord) => {
+    setSelectedRecord(record);
+    setFormOpen(true);
+  };
+
+  const handleDelete = (record: HarvestRecord) => {
+    setSelectedRecord(record);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+    setSelectedRecord(null);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+    setSelectedRecord(null);
+  };
+
+  const getGradeColor = (grade: string) => {
     switch (grade) {
-      case TeaGrade.PREMIUM:
-        return 'error';
-      case TeaGrade.HIGH:
+      case 'PREMIUM':
+        return 'success';
+      case 'HIGH':
+        return 'primary';
+      case 'MEDIUM':
         return 'warning';
-      case TeaGrade.MEDIUM:
-        return 'info';
-      case TeaGrade.STANDARD:
-        return 'default';
+      case 'LOW':
+        return 'error';
       default:
         return 'default';
     }
@@ -55,6 +92,7 @@ const HarvestRecordsPage: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           size="large"
+          onClick={handleCreate}
         >
           新規記録
         </Button>
@@ -66,7 +104,7 @@ const HarvestRecordsPage: React.FC = () => {
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  {record.field.name}
+                  {record.teaGrade}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   収穫日: {record.harvestDate}
@@ -91,6 +129,23 @@ const HarvestRecordsPage: React.FC = () => {
                   </Typography>
                 )}
               </CardContent>
+              
+              <CardActions sx={{ justifyContent: 'flex-end' }}>
+                <IconButton
+                  size="small"
+                  onClick={() => handleEdit(record)}
+                  color="primary"
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDelete(record)}
+                  color="error"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
             </Card>
           </Grid>
         ))}
@@ -102,10 +157,24 @@ const HarvestRecordsPage: React.FC = () => {
             収穫記録が登録されていません
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            新規収穫記録を追加してください
+            新規記録を追加してください
           </Typography>
         </Box>
       )}
+
+      {/* フォームダイアログ */}
+      <HarvestRecordForm
+        open={formOpen}
+        onClose={handleFormClose}
+        record={selectedRecord}
+      />
+
+      {/* 削除確認ダイアログ */}
+      <DeleteHarvestRecordDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+        record={selectedRecord}
+      />
     </Box>
   );
 };

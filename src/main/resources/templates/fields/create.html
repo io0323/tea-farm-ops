@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}">
+  <title>新規フィールド</title>
+</head>
+<body>
+  <div th:replace="~{layout :: body(content = ~{::content})}">
+    <div th:fragment="content">
+      <div class="page-container">
+        <!-- Header -->
+        <div class="page-header">
+          <h1 class="page-title">
+            <i class="bi bi-plus-circle"></i>
+            新規フィールド
+          </h1>
+          <p class="page-subtitle">新しいフィールドを作成します</p>
+        </div>
+
+        <!-- Create Form -->
+        <div class="content-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="bi bi-geo-alt"></i>
+              フィールド作成
+            </h2>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/fields}" th:object="${field}" method="post" class="create-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="name" class="form-label">フィールド名 <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="name" th:field="*{name}" 
+                         placeholder="例: 北畑、南畑、東畑" required>
+                  <div th:if="${#fields.hasErrors('name')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{name}">フィールド名エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="location" class="form-label">場所 <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="location" th:field="*{location}" 
+                         placeholder="例: 山の上、谷間、平地" required>
+                  <div th:if="${#fields.hasErrors('location')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{location}">場所エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="areaSize" class="form-label">面積 (ha) <span class="required">*</span></label>
+                  <input type="number" class="form-control" id="areaSize" th:field="*{areaSize}" 
+                         step="0.1" min="0" placeholder="例: 2.5" required>
+                  <div th:if="${#fields.hasErrors('areaSize')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{areaSize}">面積エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="soilType" class="form-label">土壌タイプ <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="soilType" th:field="*{soilType}" 
+                         placeholder="例: 粘土質、砂質、ローム質" required>
+                  <div th:if="${#fields.hasErrors('soilType')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{soilType}">土壌タイプエラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="notes" class="form-label">備考</label>
+                  <textarea class="form-control" id="notes" th:field="*{notes}" 
+                            rows="4" placeholder="フィールドに関する備考があれば記入してください"></textarea>
+                  <div th:if="${#fields.hasErrors('notes')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{notes}">備考エラー</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check-circle"></i> 作成
+                </button>
+                <a href="/fields" class="btn btn-secondary">
+                  <i class="bi bi-arrow-left"></i> 戻る
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .page-container {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        
+        .page-header {
+          text-align: center;
+          margin-bottom: 2rem;
+          padding: 2rem 0;
+        }
+        
+        .page-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+        }
+        
+        .page-title i {
+          color: #10b981;
+          font-size: 2.2rem;
+        }
+        
+        .page-subtitle {
+          color: #64748b;
+          font-size: 1.1rem;
+          margin: 0;
+        }
+        
+        .content-card {
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+          margin-bottom: 2rem;
+        }
+        
+        .card-header {
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          padding: 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .card-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #374151;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .card-title i {
+          color: #10b981;
+        }
+        
+        .card-body {
+          padding: 2rem;
+        }
+        
+        .create-form {
+          margin-bottom: 0;
+        }
+        
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+        
+        .form-group.full-width {
+          grid-column: 1 / -1;
+        }
+        
+        .form-group {
+          margin-bottom: 0;
+        }
+        
+        .form-label {
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+        
+        .required {
+          color: #ef4444;
+        }
+        
+        .form-control {
+          border-radius: 8px;
+          border: 1px solid #d1d5db;
+          padding: 0.75rem 1rem;
+          transition: all 0.3s ease;
+          width: 100%;
+          font-size: 1rem;
+        }
+        
+        .form-control:focus {
+          border-color: #10b981;
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+          outline: none;
+        }
+        
+        textarea.form-control {
+          resize: vertical;
+          min-height: 100px;
+        }
+        
+        .error-message {
+          color: #ef4444;
+          font-size: 0.875rem;
+          margin-top: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+        
+        .error-message i {
+          font-size: 0.75rem;
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          padding-top: 1rem;
+          border-top: 1px solid #e2e8f0;
+        }
+        
+        .btn {
+          border-radius: 8px;
+          font-weight: 500;
+          padding: 0.75rem 1.5rem;
+          transition: all 0.3s ease;
+          border: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 1rem;
+        }
+        
+        .btn-success {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+        }
+        
+        .btn-success:hover {
+          background: linear-gradient(135deg, #059669 0%, #047857 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+          background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+          color: white;
+        }
+        
+        .btn-secondary:hover {
+          background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .form-actions {
+            flex-direction: column;
+          }
+          
+          .page-title {
+            font-size: 2rem;
+          }
+          
+          .card-body {
+            padding: 1.5rem;
+          }
+        }
+      </style>
+    </div>
+  </div>
+</body>
+</html> 

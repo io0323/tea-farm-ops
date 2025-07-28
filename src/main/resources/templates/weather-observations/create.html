@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}">
+  <title>新規天気観測</title>
+</head>
+<body>
+  <div th:replace="~{layout :: body}">
+    <div th:fragment="content">
+      <div class="page-container">
+        <!-- Header -->
+        <div class="page-header">
+          <h1 class="page-title">
+            <i class="bi bi-plus-circle"></i>
+            新規天気観測
+          </h1>
+          <p class="page-subtitle">新しい天気観測データを作成します</p>
+        </div>
+
+        <!-- Create Form -->
+        <div class="content-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="bi bi-cloud-sun"></i>
+              天気観測作成
+            </h2>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/weather-observations}" th:object="${weatherObservation}" method="post" class="create-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="field" class="form-label">フィールド <span class="required">*</span></label>
+                  <select class="form-control" id="field" th:field="*{field}" required>
+                    <option value="">フィールドを選択してください</option>
+                    <option th:each="field : ${fields}" 
+                            th:value="${field.id}" 
+                            th:text="${field.name}">北畑</option>
+                  </select>
+                  <div th:if="${#fields.hasErrors('field')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{field}">フィールドエラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="date" class="form-label">観測日 <span class="required">*</span></label>
+                  <input type="date" class="form-control" id="date" th:field="*{date}" required>
+                  <div th:if="${#fields.hasErrors('date')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{date}">観測日エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="temperature" class="form-label">気温 (°C)</label>
+                  <input type="number" class="form-control" id="temperature" th:field="*{temperature}" 
+                         step="0.1" min="-50" max="50" placeholder="例: 25.5">
+                  <div th:if="${#fields.hasErrors('temperature')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{temperature}">気温エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="rainfall" class="form-label">降水量 (mm)</label>
+                  <input type="number" class="form-control" id="rainfall" th:field="*{rainfall}" 
+                         step="0.1" min="0" max="1000" placeholder="例: 0.0">
+                  <div th:if="${#fields.hasErrors('rainfall')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{rainfall}">降水量エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="humidity" class="form-label">湿度 (%)</label>
+                  <input type="number" class="form-control" id="humidity" th:field="*{humidity}" 
+                         step="0.1" min="0" max="100" placeholder="例: 65.0">
+                  <div th:if="${#fields.hasErrors('humidity')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{humidity}">湿度エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="pestsSeen" class="form-label">害虫</label>
+                  <input type="text" class="form-control" id="pestsSeen" th:field="*{pestsSeen}" 
+                         placeholder="例: アブラムシ、カメムシ">
+                  <div th:if="${#fields.hasErrors('pestsSeen')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{pestsSeen}">害虫エラー</span>
+                  </div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="notes" class="form-label">備考</label>
+                  <textarea class="form-control" id="notes" th:field="*{notes}" 
+                            rows="4" placeholder="天候や害虫に関する備考があれば記入してください"></textarea>
+                  <div th:if="${#fields.hasErrors('notes')}" class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:errors="*{notes}">備考エラー</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check-circle"></i> 作成
+                </button>
+                <a href="/weather-observations" class="btn btn-secondary">
+                  <i class="bi bi-arrow-left"></i> 戻る
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .page-container {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        
+        .page-header {
+          text-align: center;
+          margin-bottom: 2rem;
+          padding: 2rem 0;
+        }
+        
+        .page-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+        }
+        
+        .page-title i {
+          color: #10b981;
+          font-size: 2.2rem;
+        }
+        
+        .page-subtitle {
+          color: #64748b;
+          font-size: 1.1rem;
+          margin: 0;
+        }
+        
+        .content-card {
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+          margin-bottom: 2rem;
+        }
+        
+        .card-header {
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          padding: 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .card-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #374151;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .card-title i {
+          color: #10b981;
+        }
+        
+        .card-body {
+          padding: 2rem;
+        }
+        
+        .create-form {
+          margin-bottom: 0;
+        }
+        
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+        
+        .form-group.full-width {
+          grid-column: 1 / -1;
+        }
+        
+        .form-group {
+          margin-bottom: 0;
+        }
+        
+        .form-label {
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+        
+        .required {
+          color: #ef4444;
+        }
+        
+        .form-control {
+          border-radius: 8px;
+          border: 1px solid #d1d5db;
+          padding: 0.75rem 1rem;
+          transition: all 0.3s ease;
+          width: 100%;
+          font-size: 1rem;
+        }
+        
+        .form-control:focus {
+          border-color: #10b981;
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+          outline: none;
+        }
+        
+        textarea.form-control {
+          resize: vertical;
+          min-height: 100px;
+        }
+        
+        .error-message {
+          color: #ef4444;
+          font-size: 0.875rem;
+          margin-top: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+        
+        .error-message i {
+          font-size: 0.75rem;
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          padding-top: 1rem;
+          border-top: 1px solid #e2e8f0;
+        }
+        
+        .btn {
+          border-radius: 8px;
+          font-weight: 500;
+          padding: 0.75rem 1.5rem;
+          transition: all 0.3s ease;
+          border: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 1rem;
+        }
+        
+        .btn-success {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+        }
+        
+        .btn-success:hover {
+          background: linear-gradient(135deg, #059669 0%, #047857 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+          background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+          color: white;
+        }
+        
+        .btn-secondary:hover {
+          background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .form-actions {
+            flex-direction: column;
+          }
+          
+          .page-title {
+            font-size: 2rem;
+          }
+          
+          .card-body {
+            padding: 1.5rem;
+          }
+        }
+      </style>
+    </div>
+  </div>
+</body>
+</html> 

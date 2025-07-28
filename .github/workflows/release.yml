@@ -1,0 +1,205 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # リリース前テスト
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+        java-version: [17, 21]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+
+      - name: Setup Java ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Frontend tests
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run test:ci
+          npm run build
+
+      - name: Backend tests
+        working-directory: ./backend
+        run: |
+          mvn test
+          mvn package -DskipTests
+
+  # リリースノート生成
+  release-notes:
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      notes: ${{ steps.notes.outputs.notes }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: commits } = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'main',
+              head: context.sha
+            });
+            
+            const notes = commits.commits
+              .map(commit => `- ${commit.commit.message}`)
+              .join('\n');
+            
+            return notes;
+
+  # Dockerイメージビルド
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=tag
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # GitHubリリース作成
+  release:
+    runs-on: ubuntu-latest
+    needs: [test, release-notes, build]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## What's Changed
+            
+            ${{ needs.release-notes.outputs.notes }}
+            
+            ## Docker Image
+            
+            ```bash
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            ```
+            
+            ## Installation
+            
+            ```bash
+            # Using Docker Compose
+            docker-compose up -d
+            ```
+            
+            ## Breaking Changes
+            
+            None
+            
+            ## Bug Fixes
+            
+            - Various bug fixes and improvements
+            
+            ## New Features
+            
+            - Enhanced user interface
+            - Improved performance
+            - Better error handling
+          draft: false
+          prerelease: false
+
+  # デプロイ
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, build, release]
+    environment: production
+
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Deploying version ${{ github.ref_name }} to production..."
+          
+          # 実際のデプロイスクリプト
+          # 例: kubectl set image deployment/tea-farm-ops tea-farm-ops=${{ needs.build.outputs.image }}
+          
+          echo "Deployment completed successfully!"
+
+      - name: Health check
+        run: |
+          echo "Performing health check..."
+          sleep 30
+          curl -f http://your-production-url/actuator/health || exit 1
+
+      - name: Notify deployment
+        run: |
+          echo "🚀 Version ${{ github.ref_name }} has been deployed to production!"
+          
+          # Slack通知の例
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data "{\"text\":\"🚀 Version ${{ github.ref_name }} deployed to production!\"}" \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }} 

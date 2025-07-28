@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -8,29 +8,66 @@ import {
   Grid,
   Chip,
   CircularProgress,
+  IconButton,
+  CardActions,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { fetchTasks } from '../store/slices/taskSlice';
-import { TaskStatus, TaskType } from '../types';
+import { Task } from '../types';
+import TaskForm from '../components/tasks/TaskForm';
+import DeleteTaskDialog from '../components/tasks/DeleteTaskDialog';
 
 const TasksPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { tasks, loading } = useAppSelector((state) => state.tasks);
+  
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
 
-  const getStatusColor = (status: TaskStatus) => {
+  const handleCreate = () => {
+    setSelectedTask(null);
+    setFormOpen(true);
+  };
+
+  const handleEdit = (task: Task) => {
+    setSelectedTask(task);
+    setFormOpen(true);
+  };
+
+  const handleDelete = (task: Task) => {
+    setSelectedTask(task);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+    setSelectedTask(null);
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case TaskStatus.COMPLETED:
-        return 'success';
-      case TaskStatus.IN_PROGRESS:
+      case 'PENDING':
         return 'warning';
-      case TaskStatus.PENDING:
+      case 'IN_PROGRESS':
         return 'info';
-      case TaskStatus.CANCELLED:
+      case 'COMPLETED':
+        return 'success';
+      case 'CANCELLED':
         return 'error';
       default:
         return 'default';
@@ -55,6 +92,7 @@ const TasksPage: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           size="large"
+          onClick={handleCreate}
         >
           新規タスク
         </Button>
@@ -69,7 +107,7 @@ const TasksPage: React.FC = () => {
                   {task.taskType}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {task.field.name}
+                  担当者: {task.assignedWorker}
                 </Typography>
                 
                 <Box display="flex" gap={1} sx={{ mb: 2 }}>
@@ -78,23 +116,38 @@ const TasksPage: React.FC = () => {
                     size="small"
                     color={getStatusColor(task.status) as any}
                   />
-                  <Chip
-                    label={task.assignedWorker}
-                    size="small"
-                    variant="outlined"
-                  />
                 </Box>
 
-                <Typography variant="body2" color="text.secondary">
-                  {task.startDate} - {task.endDate}
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  開始: {task.startDate}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  終了: {task.endDate}
                 </Typography>
 
                 {task.notes && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
                     {task.notes}
                   </Typography>
                 )}
               </CardContent>
+              
+              <CardActions sx={{ justifyContent: 'flex-end' }}>
+                <IconButton
+                  size="small"
+                  onClick={() => handleEdit(task)}
+                  color="primary"
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDelete(task)}
+                  color="error"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
             </Card>
           </Grid>
         ))}
@@ -110,6 +163,20 @@ const TasksPage: React.FC = () => {
           </Typography>
         </Box>
       )}
+
+      {/* フォームダイアログ */}
+      <TaskForm
+        open={formOpen}
+        onClose={handleFormClose}
+        task={selectedTask}
+      />
+
+      {/* 削除確認ダイアログ */}
+      <DeleteTaskDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+        task={selectedTask}
+      />
     </Box>
   );
 };

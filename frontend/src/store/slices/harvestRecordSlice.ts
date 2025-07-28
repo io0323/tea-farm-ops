@@ -1,6 +1,47 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { HarvestRecord, HarvestRecordSearchParams } from '../../types';
-import apiClient from '../../services/api';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { HarvestRecord } from '../../types';
+import { apiClient } from '../../services/apiClient';
+
+// 非同期アクション
+export const fetchHarvestRecords = createAsyncThunk(
+  'harvestRecords/fetchHarvestRecords',
+  async () => {
+    const response = await apiClient.get('/api/harvest-records');
+    return response.data;
+  }
+);
+
+export const fetchHarvestRecordById = createAsyncThunk(
+  'harvestRecords/fetchHarvestRecordById',
+  async (id: number) => {
+    const response = await apiClient.get(`/api/harvest-records/${id}`);
+    return response.data;
+  }
+);
+
+export const createHarvestRecord = createAsyncThunk(
+  'harvestRecords/createHarvestRecord',
+  async (record: Omit<HarvestRecord, 'id'>) => {
+    const response = await apiClient.post('/api/harvest-records', record);
+    return response.data;
+  }
+);
+
+export const updateHarvestRecord = createAsyncThunk(
+  'harvestRecords/updateHarvestRecord',
+  async ({ id, record }: { id: number; record: Partial<HarvestRecord> }) => {
+    const response = await apiClient.put(`/api/harvest-records/${id}`, record);
+    return response.data;
+  }
+);
+
+export const deleteHarvestRecord = createAsyncThunk(
+  'harvestRecords/deleteHarvestRecord',
+  async (id: number) => {
+    await apiClient.delete(`/api/harvest-records/${id}`);
+    return id;
+  }
+);
 
 interface HarvestRecordState {
   harvestRecords: HarvestRecord[];
@@ -16,18 +57,6 @@ const initialState: HarvestRecordState = {
   error: null,
 };
 
-export const fetchHarvestRecords = createAsyncThunk(
-  'harvestRecords/fetchHarvestRecords',
-  async (params?: HarvestRecordSearchParams, { rejectWithValue }) => {
-    try {
-      const records = await apiClient.getHarvestRecords(params);
-      return records;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || '収穫記録の取得に失敗しました');
-    }
-  }
-);
-
 const harvestRecordSlice = createSlice({
   name: 'harvestRecords',
   initialState,
@@ -41,18 +70,79 @@ const harvestRecordSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // fetchHarvestRecords
       .addCase(fetchHarvestRecords.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchHarvestRecords.fulfilled, (state, action: PayloadAction<HarvestRecord[]>) => {
+      .addCase(fetchHarvestRecords.fulfilled, (state, action) => {
         state.loading = false;
         state.harvestRecords = action.payload;
-        state.error = null;
       })
       .addCase(fetchHarvestRecords.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '収穫記録の取得に失敗しました';
+      })
+      // fetchHarvestRecordById
+      .addCase(fetchHarvestRecordById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchHarvestRecordById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentHarvestRecord = action.payload;
+      })
+      .addCase(fetchHarvestRecordById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || '収穫記録の取得に失敗しました';
+      })
+      // createHarvestRecord
+      .addCase(createHarvestRecord.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createHarvestRecord.fulfilled, (state, action) => {
+        state.loading = false;
+        state.harvestRecords.push(action.payload);
+      })
+      .addCase(createHarvestRecord.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || '収穫記録の作成に失敗しました';
+      })
+      // updateHarvestRecord
+      .addCase(updateHarvestRecord.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateHarvestRecord.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.harvestRecords.findIndex(record => record.id === action.payload.id);
+        if (index !== -1) {
+          state.harvestRecords[index] = action.payload;
+        }
+        if (state.currentHarvestRecord?.id === action.payload.id) {
+          state.currentHarvestRecord = action.payload;
+        }
+      })
+      .addCase(updateHarvestRecord.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || '収穫記録の更新に失敗しました';
+      })
+      // deleteHarvestRecord
+      .addCase(deleteHarvestRecord.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteHarvestRecord.fulfilled, (state, action) => {
+        state.loading = false;
+        state.harvestRecords = state.harvestRecords.filter(record => record.id !== action.payload);
+        if (state.currentHarvestRecord?.id === action.payload) {
+          state.currentHarvestRecord = null;
+        }
+      })
+      .addCase(deleteHarvestRecord.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || '収穫記録の削除に失敗しました';
       });
   },
 });

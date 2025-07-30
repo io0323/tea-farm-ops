@@ -1,0 +1,162 @@
+groups:
+  - name: tea-farm-ops-alerts
+    rules:
+      # システムアラート
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高CPU使用率"
+          description: "{{ $labels.instance }} のCPU使用率が80%を超えています ({{ $value }}%)"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高メモリ使用率"
+          description: "{{ $labels.instance }} のメモリ使用率が85%を超えています ({{ $value }}%)"
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高ディスク使用率"
+          description: "{{ $labels.instance }} のディスク使用率が85%を超えています ({{ $value }}%)"
+
+      # アプリケーションアラート
+      - alert: SpringBootDown
+        expr: up{job="spring-boot-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spring Boot アプリケーションが停止"
+          description: "{{ $labels.instance }} のSpring Bootアプリケーションが応答していません"
+
+      - alert: HighHTTPErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高HTTPエラー率"
+          description: "{{ $labels.instance }} でHTTP 5xxエラー率が5%を超えています ({{ $value }}%)"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高レスポンス時間"
+          description: "{{ $labels.instance }} の95パーセンタイルレスポンス時間が2秒を超えています ({{ $value }}s)"
+
+      # データベースアラート
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQLが停止"
+          description: "{{ $labels.instance }} のPostgreSQLが応答していません"
+
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高データベース接続数"
+          description: "{{ $labels.instance }} のデータベース接続数が80を超えています ({{ $value }})"
+
+      - alert: SlowQueries
+        expr: rate(pg_stat_activity_max_tx_duration[5m]) > 30
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "遅いクエリ"
+          description: "{{ $labels.instance }} で30秒を超えるクエリが実行されています"
+
+      # Nginxアラート
+      - alert: NginxDown
+        expr: up{job="nginx-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginxが停止"
+          description: "{{ $labels.instance }} のNginxが応答していません"
+
+      - alert: HighNginxErrorRate
+        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) / rate(nginx_http_requests_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高Nginxエラー率"
+          description: "{{ $labels.instance }} でNginx 5xxエラー率が5%を超えています ({{ $value }}%)"
+
+      # Dockerアラート
+      - alert: ContainerDown
+        expr: absent(container_cpu_usage_seconds_total{name=~"tea-farm-ops.*"})
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "コンテナが停止"
+          description: "TeaFarmOpsコンテナが停止しています"
+
+      - alert: HighContainerMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高コンテナメモリ使用率"
+          description: "{{ $labels.name }} のメモリ使用率が85%を超えています ({{ $value }}%)"
+
+      # JVMアラート
+      - alert: HighJVMHeapUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高JVMヒープ使用率"
+          description: "{{ $labels.instance }} のJVMヒープ使用率が80%を超えています ({{ $value }}%)"
+
+      - alert: HighJVMGCTime
+        expr: rate(jvm_gc_collection_seconds_sum[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高GC時間"
+          description: "{{ $labels.instance }} でGC時間が増加しています ({{ $value }}s/s)"
+
+      # ビジネスメトリクスアラート
+      - alert: LowActiveUsers
+        expr: tea_farm_ops_active_users < 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "アクティブユーザー数が少ない"
+          description: "アクティブユーザー数が1未満です ({{ $value }})"
+
+      - alert: HighErrorRate
+        expr: rate(tea_farm_ops_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高エラー率"
+          description: "アプリケーションエラー率が増加しています ({{ $value }} errors/s)" 

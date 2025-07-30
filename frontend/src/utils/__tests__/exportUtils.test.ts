@@ -4,7 +4,7 @@ import {
   exportFieldsToCSV,
   exportTasksToCSV,
 } from '../exportUtils';
-import { Field, Task } from '../../types';
+import { Field, Task, TaskType, TaskStatus } from '../../types';
 
 // モックデータ
 const mockFields: Field[] = [
@@ -29,11 +29,12 @@ const mockFields: Field[] = [
 const mockTasks: Task[] = [
   {
     id: 1,
-    taskType: 'PLANTING',
+    taskType: TaskType.PLANTING,
+    field: mockFields[0],
     assignedWorker: '田中太郎',
     startDate: '2024-01-01',
     endDate: '2024-01-31',
-    status: 'IN_PROGRESS',
+    status: TaskStatus.IN_PROGRESS,
     notes: 'テストタスク1',
   },
 ];
@@ -55,7 +56,7 @@ describe('exportUtils', () => {
     jest.clearAllMocks();
     
     // グローバルオブジェクトのモック
-    global.URL.createObjectURL = mockCreateObjectURL;
+    global.URL.createObjectURL = mockCreateObjectURL.mockReturnValue('blob:mock-url');
     global.URL.revokeObjectURL = mockRevokeObjectURL;
     global.document.createElement = jest.fn(() => mockLink as any);
     global.document.body.appendChild = jest.fn();

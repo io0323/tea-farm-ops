@@ -6,18 +6,22 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { store } from './store';
 import AppRoutes from './routes/AppRoutes';
 
-// Material-UIテーマの作成
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
     primary: {
-      main: '#2e7d32', // 緑色（茶園らしい）
+      main: '#4ade80',
     },
     secondary: {
-      main: '#8bc34a', // ライトグリーン
+      main: '#60a5fa',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#1a1a2e',
+      paper: '#1e293b',
+    },
+    text: {
+      primary: '#f1f5f9',
+      secondary: '#94a3b8',
     },
   },
   typography: {
@@ -37,7 +41,16 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+          border: '1px solid #475569',
+        },
+      },
+    },
+    MuiCircularProgress: {
+      styleOverrides: {
+        root: {
+          color: '#4ade80',
         },
       },
     },

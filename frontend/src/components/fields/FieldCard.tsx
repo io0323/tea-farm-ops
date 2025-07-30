@@ -6,6 +6,7 @@ import {
   Chip,
   IconButton,
   CardActions,
+  Box,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { Field } from '../../types';

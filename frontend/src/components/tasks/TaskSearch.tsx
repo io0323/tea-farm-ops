@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Card,
   CardContent,
-  Grid,
   TextField,
   FormControl,
   InputLabel,
@@ -65,80 +64,72 @@ const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
           タスク検索
         </Typography>
         
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>タスクタイプ</InputLabel>
-              <Select
-                value={filters.taskType}
-                onChange={(e) => handleChange('taskType', e.target.value)}
-                label="タスクタイプ"
-              >
-                <MenuItem value="">
-                  <em>すべて</em>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' }, gap: 2, alignItems: 'center' }}>
+          <FormControl fullWidth size="small">
+            <InputLabel>タスクタイプ</InputLabel>
+            <Select
+              value={filters.taskType}
+              onChange={(e) => handleChange('taskType', e.target.value)}
+              label="タスクタイプ"
+            >
+              <MenuItem value="">
+                <em>すべて</em>
+              </MenuItem>
+              {Object.values(TaskType).map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
                 </MenuItem>
-                {Object.values(TaskType).map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+              ))}
+            </Select>
+          </FormControl>
           
-          <Grid item xs={12} sm={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>ステータス</InputLabel>
-              <Select
-                value={filters.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-                label="ステータス"
-              >
-                <MenuItem value="">
-                  <em>すべて</em>
+          <FormControl fullWidth size="small">
+            <InputLabel>ステータス</InputLabel>
+            <Select
+              value={filters.status}
+              onChange={(e) => handleChange('status', e.target.value)}
+              label="ステータス"
+            >
+              <MenuItem value="">
+                <em>すべて</em>
+              </MenuItem>
+              {Object.values(TaskStatus).map((status) => (
+                <MenuItem key={status} value={status}>
+                  {status}
                 </MenuItem>
-                {Object.values(TaskStatus).map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+              ))}
+            </Select>
+          </FormControl>
           
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
-              label="担当者"
-              value={filters.assignedWorker}
-              onChange={(e) => handleChange('assignedWorker', e.target.value)}
+          <TextField
+            fullWidth
+            label="担当者"
+            value={filters.assignedWorker}
+            onChange={(e) => handleChange('assignedWorker', e.target.value)}
+            size="small"
+          />
+          
+          <Box display="flex" gap={1}>
+            <Button
+              variant="contained"
+              startIcon={<SearchIcon />}
+              onClick={handleSearch}
+              disabled={!hasActiveFilters}
               size="small"
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={3}>
-            <Box display="flex" gap={1}>
-              <Button
-                variant="contained"
-                startIcon={<SearchIcon />}
-                onClick={handleSearch}
-                disabled={!hasActiveFilters}
-                size="small"
-              >
-                検索
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<ClearIcon />}
-                onClick={handleClear}
-                disabled={!hasActiveFilters}
-                size="small"
-              >
-                クリア
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+            >
+              検索
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ClearIcon />}
+              onClick={handleClear}
+              disabled={!hasActiveFilters}
+              size="small"
+            >
+              クリア
+            </Button>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

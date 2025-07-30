@@ -6,12 +6,12 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Alert,
+  Box,
 } from '@mui/material';
 import { Field } from '../../types';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
@@ -71,11 +71,11 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
     }
   }, [open, dispatch]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name as string]: value,
+      [name]: value,
     }));
   };
 
@@ -115,79 +115,70 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
             </Alert>
           )}
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="フィールド名"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                margin="normal"
-              />
-            </Grid>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+            <TextField
+              fullWidth
+              label="フィールド名"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
             
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="場所"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                margin="normal"
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="場所"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="面積 (ha)"
-                name="areaSize"
-                type="number"
-                value={formData.areaSize}
-                onChange={handleChange}
-                required
-                margin="normal"
-                inputProps={{ min: 0, step: 0.1 }}
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="面積 (ha)"
+              name="areaSize"
+              type="number"
+              value={formData.areaSize}
+              onChange={handleChange}
+              required
+              margin="normal"
+              inputProps={{ min: 0, step: 0.1 }}
+            />
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>土壌タイプ</InputLabel>
-                <Select
-                  name="soilType"
-                  value={formData.soilType}
-                  onChange={handleChange}
-                  label="土壌タイプ"
-                >
-                  <MenuItem value="">
-                    <em>選択してください</em>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>土壌タイプ</InputLabel>
+              <Select
+                name="soilType"
+                value={formData.soilType}
+                onChange={handleChange}
+                label="土壌タイプ"
+              >
+                <MenuItem value="">
+                  <em>選択してください</em>
+                </MenuItem>
+                {soilTypes.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
                   </MenuItem>
-                  {soilTypes.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                ))}
+              </Select>
+            </FormControl>
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="備考"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                multiline
-                rows={3}
-                margin="normal"
-              />
-            </Grid>
-          </Grid>
+            <TextField
+              fullWidth
+              label="備考"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              multiline
+              rows={3}
+              margin="normal"
+              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+            />
+          </Box>
         </DialogContent>
 
         <DialogActions>

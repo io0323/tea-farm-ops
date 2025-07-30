@@ -21,7 +21,7 @@ const initialState: FieldState = {
 // 非同期アクション
 export const fetchFields = createAsyncThunk(
   'fields/fetchFields',
-  async (params?: FieldSearchParams, { rejectWithValue }) => {
+  async (params?: FieldSearchParams, { rejectWithValue } = {} as any) => {
     try {
       const fields = await apiClient.getFields(params);
       return fields;

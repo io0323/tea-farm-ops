@@ -5,7 +5,7 @@ WORKDIR /app/frontend
 
 # フロントエンドの依存関係をインストール
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
 # フロントエンドのソースコードをコピー
 COPY frontend/ ./
@@ -14,7 +14,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # バックエンドビルド
-FROM maven:3.8.4-openjdk-17 AS backend-builder
+FROM maven:latest AS backend-builder
 
 WORKDIR /app/backend
 
@@ -29,12 +29,12 @@ COPY backend/ ./
 RUN mvn clean package -DskipTests
 
 # 本番環境
-FROM openjdk:17-jre-alpine
+FROM openjdk:17-slim
 
 WORKDIR /app
 
 # 必要なパッケージをインストール
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # バックエンドJARファイルをコピー
 COPY --from=backend-builder /app/backend/target/*.jar app.jar

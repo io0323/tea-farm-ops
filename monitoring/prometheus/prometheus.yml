@@ -1,0 +1,69 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'tea-farm-ops'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus自身の監視
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 5s
+
+  # Spring Boot アプリケーション
+  - job_name: 'spring-boot-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['backend:8080']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+
+  # Node Exporter (システムメトリクス)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+
+  # Nginx Exporter
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 15s
+
+  # Docker Exporter
+  - job_name: 'docker-exporter'
+    static_configs:
+      - targets: ['docker-exporter:9323']
+    scrape_interval: 15s
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
+  # Alertmanager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 30s
+    metrics_path: '/metrics' 

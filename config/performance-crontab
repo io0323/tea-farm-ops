@@ -1,0 +1,159 @@
+# TeaFarmOps パフォーマンス最適化自動実行スケジュール
+# 使用方法: crontab config/performance-crontab
+
+# 環境変数の設定
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=performance@your-domain.com
+
+# パフォーマンスディレクトリの設定
+PERFORMANCE_DIR=/app/scripts
+LOG_DIR=/var/log/tea-farm-ops/performance
+CONFIG_FILE=/etc/tea-farm-ops/performance-config.yml
+
+# キャッシュシステム監視（毎時間）
+0 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-cache.sh --monitor >> $LOG_DIR/cron_cache.log 2>&1
+
+# キャッシュ最適化（毎日03:00）
+0 3 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-cache.sh --optimize >> $LOG_DIR/cron_cache_optimize.log 2>&1
+
+# データベース監視（毎30分）
+*/30 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --monitor >> $LOG_DIR/cron_database.log 2>&1
+
+# データベースVACUUM（毎日02:00）
+0 2 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --vacuum >> $LOG_DIR/cron_database_vacuum.log 2>&1
+
+# データベース分析（毎日04:00）
+0 4 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --analyze >> $LOG_DIR/cron_database_analyze.log 2>&1
+
+# インデックス最適化（毎週日曜日01:00）
+0 1 * * 0 /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --index >> $LOG_DIR/cron_database_index.log 2>&1
+
+# Nginx監視（毎15分）
+*/15 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-nginx.sh --monitor >> $LOG_DIR/cron_nginx.log 2>&1
+
+# Nginx設定最適化（毎週月曜日02:00）
+0 2 * * 1 /usr/bin/bash $PERFORMANCE_DIR/performance-nginx.sh --configure >> $LOG_DIR/cron_nginx_configure.log 2>&1
+
+# 包括的パフォーマンス監視（毎日05:00）
+0 5 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --monitor >> $LOG_DIR/cron_overall_monitor.log 2>&1
+
+# パフォーマンステスト（毎週土曜日03:00）
+0 3 * * 6 /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --test >> $LOG_DIR/cron_performance_test.log 2>&1
+
+# 包括的最適化（毎月1日00:00）
+0 0 1 * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --optimize >> $LOG_DIR/cron_comprehensive_optimize.log 2>&1
+
+# ログローテーション（毎日06:00）
+0 6 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --log-rotation >> $LOG_DIR/cron_log_rotation.log 2>&1
+
+# キャッシュクリーンアップ（毎日07:00）
+0 7 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-cache.sh --cleanup >> $LOG_DIR/cron_cache_cleanup.log 2>&1
+
+# データベース設定最適化（毎週火曜日01:00）
+0 1 * * 2 /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --configure >> $LOG_DIR/cron_database_configure.log 2>&1
+
+# SSL証明書監視（毎日08:00）
+0 8 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-nginx.sh --ssl-status >> $LOG_DIR/cron_ssl_status.log 2>&1
+
+# Gzip圧縮テスト（毎週水曜日02:00）
+0 2 * * 3 /usr/bin/bash $PERFORMANCE_DIR/performance-nginx.sh --gzip-test >> $LOG_DIR/cron_gzip_test.log 2>&1
+
+# プロキシ設定最適化（毎週木曜日01:00）
+0 1 * * 4 /usr/bin/bash $PERFORMANCE_DIR/performance-nginx.sh --proxy >> $LOG_DIR/cron_proxy_optimize.log 2>&1
+
+# システムリソース監視（毎5分）
+*/5 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --system-monitor >> $LOG_DIR/cron_system_monitor.log 2>&1
+
+# メモリ使用量監視（毎10分）
+*/10 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --memory-monitor >> $LOG_DIR/cron_memory_monitor.log 2>&1
+
+# ディスク使用量監視（毎30分）
+*/30 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --disk-monitor >> $LOG_DIR/cron_disk_monitor.log 2>&1
+
+# ネットワーク監視（毎15分）
+*/15 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --network-monitor >> $LOG_DIR/cron_network_monitor.log 2>&1
+
+# アプリケーション監視（毎分）
+* * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --app-monitor >> $LOG_DIR/cron_app_monitor.log 2>&1
+
+# レスポンス時間監視（毎5分）
+*/5 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --response-monitor >> $LOG_DIR/cron_response_monitor.log 2>&1
+
+# エラー率監視（毎分）
+* * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --error-monitor >> $LOG_DIR/cron_error_monitor.log 2>&1
+
+# キャッシュヒット率監視（毎10分）
+*/10 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-cache.sh --hit-rate >> $LOG_DIR/cron_cache_hitrate.log 2>&1
+
+# データベース接続監視（毎5分）
+*/5 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --connection-monitor >> $LOG_DIR/cron_db_connection.log 2>&1
+
+# スロークエリ監視（毎日09:00）
+0 9 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --slow-query-monitor >> $LOG_DIR/cron_slow_query.log 2>&1
+
+# ロック監視（毎分）
+* * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-database.sh --lock-monitor >> $LOG_DIR/cron_lock_monitor.log 2>&1
+
+# Nginxアクセスログ分析（毎日10:00）
+0 10 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-nginx.sh --log-analysis >> $LOG_DIR/cron_nginx_log_analysis.log 2>&1
+
+# セキュリティ監視（毎日11:00）
+0 11 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --security-monitor >> $LOG_DIR/cron_security_monitor.log 2>&1
+
+# バックアップ監視（毎日12:00）
+0 12 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --backup-monitor >> $LOG_DIR/cron_backup_monitor.log 2>&1
+
+# 設定ファイル整合性チェック（毎日13:00）
+0 13 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --config-check >> $LOG_DIR/cron_config_check.log 2>&1
+
+# サービス状態監視（毎5分）
+*/5 * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --service-monitor >> $LOG_DIR/cron_service_monitor.log 2>&1
+
+# パフォーマンスレポート生成（毎日14:00）
+0 14 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --generate-report >> $LOG_DIR/cron_report_generation.log 2>&1
+
+# 週次レポート生成（毎週金曜日15:00）
+0 15 * * 5 /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --generate-weekly-report >> $LOG_DIR/cron_weekly_report.log 2>&1
+
+# 月次レポート生成（毎月1日16:00）
+0 16 1 * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --generate-monthly-report >> $LOG_DIR/cron_monthly_report.log 2>&1
+
+# アラート通知（毎分）
+* * * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --alert-check >> $LOG_DIR/cron_alert_check.log 2>&1
+
+# メンテナンスモード監視（毎日17:00）
+0 17 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --maintenance-check >> $LOG_DIR/cron_maintenance_check.log 2>&1
+
+# パフォーマンスベンチマーク（毎週土曜日04:00）
+0 4 * * 6 /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --benchmark >> $LOG_DIR/cron_benchmark.log 2>&1
+
+# 負荷テスト（毎週日曜日05:00）
+0 5 * * 0 /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --load-test >> $LOG_DIR/cron_load_test.log 2>&1
+
+# ストレステスト（毎月第1日曜日06:00）
+0 6 1-7 * 0 /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --stress-test >> $LOG_DIR/cron_stress_test.log 2>&1
+
+# キャパシティプランニング（毎月15日07:00）
+0 7 15 * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --capacity-planning >> $LOG_DIR/cron_capacity_planning.log 2>&1
+
+# コスト最適化分析（毎月最終日08:00）
+0 8 28-31 * * [ $(date +\%d) -eq $(date -d "$(date +\%Y\%m01) +1 month -1 day" +\%d) ] && /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --cost-analysis >> $LOG_DIR/cron_cost_analysis.log 2>&1
+
+# ログクリーンアップ（毎日18:00）
+0 18 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --log-cleanup >> $LOG_DIR/cron_log_cleanup.log 2>&1
+
+# 一時ファイルクリーンアップ（毎日19:00）
+0 19 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --temp-cleanup >> $LOG_DIR/cron_temp_cleanup.log 2>&1
+
+# 設定ファイルバックアップ（毎日20:00）
+0 20 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --config-backup >> $LOG_DIR/cron_config_backup.log 2>&1
+
+# パフォーマンスデータバックアップ（毎日21:00）
+0 21 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --data-backup >> $LOG_DIR/cron_data_backup.log 2>&1
+
+# システム整合性チェック（毎日22:00）
+0 22 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --integrity-check >> $LOG_DIR/cron_integrity_check.log 2>&1
+
+# 夜間最適化（毎日23:00）
+0 23 * * * /usr/bin/bash $PERFORMANCE_DIR/performance-optimize.sh --nightly-optimization >> $LOG_DIR/cron_nightly_optimization.log 2>&1 

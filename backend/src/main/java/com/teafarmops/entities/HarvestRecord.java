@@ -32,9 +32,10 @@ public class HarvestRecord {
   @Column(name = "quantity_kg", nullable = false)
   private Double quantityKg;
 
-  @NotBlank(message = "茶葉グレードは必須です")
+  @NotNull(message = "茶葉グレードは必須です")
+  @Enumerated(EnumType.STRING)
   @Column(name = "tea_grade", nullable = false)
-  private String teaGrade;
+  private TeaGrade teaGrade;
 
   @Column(columnDefinition = "TEXT")
   private String notes;
@@ -44,7 +45,7 @@ public class HarvestRecord {
 
   // コンストラクタ
   public HarvestRecord(Field field, LocalDate harvestDate, Double quantityKg, 
-                       String teaGrade, String notes) {
+                       TeaGrade teaGrade, String notes) {
     this.field = field;
     this.harvestDate = harvestDate;
     this.quantityKg = quantityKg;
@@ -85,11 +86,11 @@ public class HarvestRecord {
     this.quantityKg = quantityKg;
   }
 
-  public String getTeaGrade() {
+  public TeaGrade getTeaGrade() {
     return teaGrade;
   }
 
-  public void setTeaGrade(String teaGrade) {
+  public void setTeaGrade(TeaGrade teaGrade) {
     this.teaGrade = teaGrade;
   }
 

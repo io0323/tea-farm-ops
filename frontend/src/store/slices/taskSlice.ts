@@ -1,44 +1,44 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Task } from '../../types';
-import { apiClient } from '../../services/apiClient';
+import { apiClient } from '../../services/api';
 
 // 非同期アクション
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
   async () => {
-    const response = await apiClient.get('/api/tasks');
-    return response.data;
+    const response = await apiClient.getTasks();
+    return response;
   }
 );
 
 export const fetchTaskById = createAsyncThunk(
   'tasks/fetchTaskById',
   async (id: number) => {
-    const response = await apiClient.get(`/api/tasks/${id}`);
-    return response.data;
+    const response = await apiClient.getTask(id);
+    return response;
   }
 );
 
 export const createTask = createAsyncThunk(
   'tasks/createTask',
   async (task: Omit<Task, 'id'>) => {
-    const response = await apiClient.post('/api/tasks', task);
-    return response.data;
+    const response = await apiClient.createTask(task);
+    return response;
   }
 );
 
 export const updateTask = createAsyncThunk(
   'tasks/updateTask',
   async ({ id, task }: { id: number; task: Partial<Task> }) => {
-    const response = await apiClient.put(`/api/tasks/${id}`, task);
-    return response.data;
+    const response = await apiClient.updateTask(id, task);
+    return response;
   }
 );
 
 export const deleteTask = createAsyncThunk(
   'tasks/deleteTask',
   async (id: number) => {
-    await apiClient.delete(`/api/tasks/${id}`);
+    await apiClient.deleteTask(id);
     return id;
   }
 );

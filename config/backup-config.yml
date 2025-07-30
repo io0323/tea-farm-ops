@@ -1,0 +1,241 @@
+# TeaFarmOps バックアップシステム設定ファイル
+# 使用方法: このファイルを /etc/tea-farm-ops/backup-config.yml に配置
+
+# バックアップシステム全体の設定
+backup:
+  # バックアップシステムの有効/無効
+  enabled: true
+  
+  # バックアップスケジュール設定
+  schedules:
+    # 日次バックアップ（毎日02:00）
+    daily: "02:00"
+    # 週次バックアップ（毎週日曜日03:00）
+    weekly: "03:00"
+    # 月次バックアップ（毎月1日04:00）
+    monthly: "04:00"
+  
+  # 通知設定
+  notifications:
+    # Slack通知の有効/無効
+    slack_enabled: true
+    # 成功時の通知
+    notify_on_success: true
+    # 失敗時の通知
+    notify_on_failure: true
+    # 警告時の通知
+    notify_on_warning: true
+
+# データベースバックアップ設定
+database:
+  # データベース接続設定
+  connection:
+    host: "localhost"
+    port: 5432
+    name: "teafarmops"
+    user: "teafarmops"
+    password: "${DB_PASSWORD}"
+  
+  # バックアップ設定
+  backup:
+    # 圧縮の有効/無効
+    compression: true
+    # バックアップ検証の有効/無効
+    verification: true
+    # 保持期間（日数）
+    retention_days: 30
+    # 差分バックアップの有効/無効
+    differential_enabled: true
+    # 増分バックアップの有効/無効
+    incremental_enabled: false
+  
+  # 復旧設定
+  restore:
+    # 復旧前のバックアップ作成
+    backup_before_restore: true
+    # 復旧後の検証
+    verify_after_restore: true
+    # 強制復旧の許可
+    allow_force_restore: false
+
+# ファイルバックアップ設定
+files:
+  # バックアップ対象ディレクトリ
+  sources:
+    - "/app/uploads"
+    - "/app/config"
+    - "/app/logs"
+    - "/etc/tea-farm-ops"
+    - "/var/lib/grafana"
+    - "/var/lib/prometheus"
+  
+  # 除外パターン
+  exclude_patterns:
+    - "*.tmp"
+    - "*.log"
+    - "*.cache"
+    - "node_modules"
+    - ".git"
+    - ".DS_Store"
+    - "*.swp"
+    - "*.swo"
+  
+  # バックアップ設定
+  backup:
+    # 圧縮の有効/無効
+    compression: true
+    # バックアップ検証の有効/無効
+    verification: true
+    # 保持期間（日数）
+    retention_days: 30
+    # 最大ファイルサイズ（MB）
+    max_file_size: 1024
+
+# 監視データバックアップ設定
+monitoring:
+  # バックアップ対象
+  sources:
+    prometheus:
+      - "/var/lib/prometheus"
+      - "/etc/prometheus"
+    grafana:
+      - "/var/lib/grafana"
+      - "/etc/grafana"
+    alertmanager:
+      - "/var/lib/alertmanager"
+      - "/etc/alertmanager"
+  
+  # バックアップ設定
+  backup:
+    # 圧縮の有効/無効
+    compression: true
+    # バックアップ検証の有効/無効
+    verification: true
+    # 保持期間（日数）
+    retention_days: 30
+    # 監視データの停止
+    stop_services: false
+
+# ストレージ設定
+storage:
+  # ローカルストレージ設定
+  local:
+    # バックアップディレクトリ
+    backup_dir: "/backups"
+    # 最大使用容量（GB）
+    max_size_gb: 100
+    # ディスク使用率警告閾値（%）
+    disk_usage_warning: 80
+    # ディスク使用率エラー閾値（%）
+    disk_usage_error: 90
+  
+  # クラウドストレージ設定（オプション）
+  cloud:
+    # AWS S3設定
+    aws_s3:
+      enabled: false
+      bucket: "tea-farm-ops-backups"
+      region: "ap-northeast-1"
+      access_key: "${AWS_ACCESS_KEY}"
+      secret_key: "${AWS_SECRET_KEY}"
+      # 暗号化設定
+      encryption: true
+      # ライフサイクル設定
+      lifecycle:
+        # 標準ストレージからIAへの移行（日数）
+        transition_to_ia_days: 30
+        # IAからGlacierへの移行（日数）
+        transition_to_glacier_days: 90
+        # Glacierから削除（日数）
+        expiration_days: 365
+    
+    # Google Cloud Storage設定
+    gcs:
+      enabled: false
+      bucket: "tea-farm-ops-backups"
+      project_id: "your-project-id"
+      service_account_key: "${GCS_SERVICE_ACCOUNT_KEY}"
+      # 暗号化設定
+      encryption: true
+
+# セキュリティ設定
+security:
+  # バックアップファイルの暗号化
+  encryption:
+    enabled: false
+    algorithm: "AES-256"
+    key_file: "/etc/tea-farm-ops/backup-key"
+  
+  # アクセス制御
+  access_control:
+    # バックアップファイルの権限
+    file_permissions: "600"
+    # ディレクトリの権限
+    directory_permissions: "700"
+    # 所有者
+    owner: "teafarmops"
+    # グループ
+    group: "teafarmops"
+
+# ログ設定
+logging:
+  # ログレベル
+  level: "INFO"
+  # ログファイル
+  file: "/var/log/tea-farm-ops/backup/backup.log"
+  # ログローテーション
+  rotation:
+    # 最大ファイルサイズ（MB）
+    max_size: 100
+    # 保持ファイル数
+    max_files: 10
+    # 圧縮
+    compress: true
+
+# パフォーマンス設定
+performance:
+  # 並行バックアップ数
+  max_concurrent_backups: 2
+  # バックアップタイムアウト（分）
+  timeout_minutes: 60
+  # メモリ使用量制限（MB）
+  memory_limit_mb: 512
+  # CPU使用率制限（%）
+  cpu_limit_percent: 50
+
+# バックアップ監視設定
+backup_monitoring:
+  # バックアップ監視の有効/無効
+  enabled: true
+  # メトリクス収集
+  metrics:
+    # バックアップ成功率
+    success_rate: true
+    # バックアップ時間
+    duration: true
+    # バックアップサイズ
+    size: true
+    # エラー率
+    error_rate: true
+  
+  # アラート設定
+  alerts:
+    # バックアップ失敗時のアラート
+    backup_failure: true
+    # ディスク容量不足時のアラート
+    disk_space_low: true
+    # バックアップ時間超過時のアラート
+    backup_timeout: true
+    # 復旧失敗時のアラート
+    restore_failure: true
+
+# テスト設定
+testing:
+  # テストモードの有効/無効
+  enabled: false
+  # テスト用バックアップディレクトリ
+  test_backup_dir: "/tmp/backup-test"
+  # テスト用データベース
+  test_database: "teafarmops_test"
+  # テスト実行間隔（時間）
+  test_interval_hours: 24 

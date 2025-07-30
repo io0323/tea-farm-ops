@@ -1,7 +1,7 @@
 package com.teafarmops.repositories;
 
 import com.teafarmops.entities.Task;
-import com.teafarmops.entities.Task.TaskStatus;
+import com.teafarmops.entities.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

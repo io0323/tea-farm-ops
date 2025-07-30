@@ -4,6 +4,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
+import React from 'react';
 
 // テストライブラリの設定
 configure({ testIdAttribute: 'data-testid' });
@@ -28,12 +29,7 @@ jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
 
-// React Routerのモック
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => jest.fn(),
-  useLocation: () => ({ pathname: '/' }),
-}));
+// React Routerのモックは各テストファイルで個別に設定
 
 // localStorageのモック
 const localStorageMock = {
@@ -41,6 +37,8 @@ const localStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
+  length: 0,
+  key: jest.fn(),
 };
 global.localStorage = localStorageMock;
 

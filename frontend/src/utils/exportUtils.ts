@@ -124,7 +124,7 @@ export const exportAllDataToCSV = (data: {
   harvestRecords: HarvestRecord[];
   weatherObservations: WeatherObservation[];
 }): void => {
-  const timestamp = new Date().toISOString().split('T')[0];
+  // const timestamp = new Date().toISOString().split('T')[0];
   
   exportFieldsToCSV(data.fields);
   setTimeout(() => exportTasksToCSV(data.tasks), 100);

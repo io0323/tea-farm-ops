@@ -1,44 +1,44 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { HarvestRecord } from '../../types';
-import { apiClient } from '../../services/apiClient';
+import { apiClient } from '../../services/api';
 
 // 非同期アクション
 export const fetchHarvestRecords = createAsyncThunk(
   'harvestRecords/fetchHarvestRecords',
   async () => {
-    const response = await apiClient.get('/api/harvest-records');
-    return response.data;
+    const response = await apiClient.getHarvestRecords();
+    return response;
   }
 );
 
 export const fetchHarvestRecordById = createAsyncThunk(
   'harvestRecords/fetchHarvestRecordById',
   async (id: number) => {
-    const response = await apiClient.get(`/api/harvest-records/${id}`);
-    return response.data;
+    const response = await apiClient.getHarvestRecord(id);
+    return response;
   }
 );
 
 export const createHarvestRecord = createAsyncThunk(
   'harvestRecords/createHarvestRecord',
   async (record: Omit<HarvestRecord, 'id'>) => {
-    const response = await apiClient.post('/api/harvest-records', record);
-    return response.data;
+    const response = await apiClient.createHarvestRecord(record);
+    return response;
   }
 );
 
 export const updateHarvestRecord = createAsyncThunk(
   'harvestRecords/updateHarvestRecord',
   async ({ id, record }: { id: number; record: Partial<HarvestRecord> }) => {
-    const response = await apiClient.put(`/api/harvest-records/${id}`, record);
-    return response.data;
+    const response = await apiClient.updateHarvestRecord(id, record);
+    return response;
   }
 );
 
 export const deleteHarvestRecord = createAsyncThunk(
   'harvestRecords/deleteHarvestRecord',
   async (id: number) => {
-    await apiClient.delete(`/api/harvest-records/${id}`);
+    await apiClient.deleteHarvestRecord(id);
     return id;
   }
 );

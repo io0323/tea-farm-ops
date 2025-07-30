@@ -1,0 +1,1139 @@
+# TeaFarmOps 監視システム強化設定ファイル
+# 使用方法: このファイルを /etc/tea-farm-ops/monitoring-config.yml に配置
+
+# 監視システム全体設定
+monitoring:
+  # 基本設定
+  general:
+    environment: "production"  # production, staging, development
+    cluster_name: "tea-farm-ops-cluster"
+    data_retention_days: 30
+    log_level: "info"  # debug, info, warn, error
+    timezone: "Asia/Tokyo"
+    
+  # Prometheus設定
+  prometheus:
+    enabled: true
+    version: "2.45.0"
+    port: 9090
+    external_url: "http://localhost:9090"
+    storage:
+      retention_time: "15d"
+      retention_size: "50GB"
+      wal_retention_period: "2h"
+      wal_retention_size: "5GB"
+    scrape_interval: "15s"
+    evaluation_interval: "15s"
+    global_labels:
+      monitor: "tea-farm-ops"
+      environment: "production"
+    targets:
+      - name: "prometheus"
+        targets: ["localhost:9090"]
+        scrape_interval: "15s"
+      - name: "node-exporter"
+        targets: ["localhost:9100"]
+        scrape_interval: "15s"
+      - name: "redis-exporter"
+        targets: ["localhost:9121"]
+        scrape_interval: "15s"
+      - name: "postgres-exporter"
+        targets: ["localhost:9187"]
+        scrape_interval: "15s"
+      - name: "nginx-exporter"
+        targets: ["localhost:9113"]
+        scrape_interval: "15s"
+      - name: "spring-boot-app"
+        targets: ["localhost:8080"]
+        metrics_path: "/actuator/prometheus"
+        scrape_interval: "15s"
+      - name: "react-app"
+        targets: ["localhost:3000"]
+        metrics_path: "/metrics"
+        scrape_interval: "30s"
+      - name: "custom-metrics"
+        targets: ["localhost:9091"]
+        scrape_interval: "30s"
+    
+  # Grafana設定
+  grafana:
+    enabled: true
+    version: "10.0.3"
+    port: 3001
+    external_url: "http://localhost:3001"
+    admin_user: "admin"
+    admin_password: "teafarmops_grafana_2024"
+    database:
+      type: "sqlite3"
+      path: "/var/lib/grafana/grafana.db"
+    security:
+      allow_sign_up: false
+      allow_org_create: false
+      disable_gravatar: false
+    logging:
+      level: "info"
+      format: "text"
+      file: "/var/log/grafana/grafana.log"
+      max_size: "100MB"
+      max_days: 7
+      max_files: 10
+    datasources:
+      - name: "Prometheus"
+        type: "prometheus"
+        url: "http://localhost:9090"
+        is_default: true
+        access: "proxy"
+        json_data:
+          time_interval: "15s"
+          query_timeout: "60s"
+          http_method: "POST"
+      - name: "PostgreSQL"
+        type: "postgres"
+        url: "localhost:5432"
+        database: "teafarmops"
+        user: "teafarmops"
+        secure_json_data:
+          password: "teafarmops_2024"
+        json_data:
+          sslmode: "disable"
+          max_open_conns: 100
+          max_idle_conns: 100
+          conn_max_lifetime: 14400
+          postgres_version: 1200
+          timescaledb: false
+      - name: "Redis"
+        type: "redis-datasource"
+        url: "redis://localhost:6379"
+        json_data:
+          client: "standalone"
+          pool_size: 5
+          timeout: 10
+          ping_interval: 0
+          pipeline_window: 0
+        secure_json_data:
+          password: "teafarmops_redis_2024"
+    
+  # Alertmanager設定
+  alertmanager:
+    enabled: true
+    version: "0.26.0"
+    port: 9093
+    external_url: "http://localhost:9093"
+    storage:
+      path: "/var/lib/alertmanager"
+      retention: "120h"
+    global:
+      resolve_timeout: "5m"
+      smtp_smarthost: "localhost:587"
+      smtp_from: "alertmanager@teafarmops.local"
+      smtp_auth_username: "alertmanager@teafarmops.local"
+      smtp_auth_password: "teafarmops_alert_2024"
+      smtp_require_tls: false
+    route:
+      group_by: ["alertname", "cluster", "service"]
+      group_wait: "30s"
+      group_interval: "5m"
+      repeat_interval: "4h"
+      receiver: "tea-farm-ops-team"
+    receivers:
+      - name: "tea-farm-ops-team"
+        email_configs:
+          - to: "team@teafarmops.local"
+            send_resolved: true
+            headers:
+              subject: "TeaFarmOps Alert: {{ .GroupLabels.alertname }}"
+        slack_configs:
+          - api_url: "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK"
+            channel: "#tea-farm-ops-alerts"
+            title: "TeaFarmOps Alert: {{ .GroupLabels.alertname }}"
+            send_resolved: true
+      - name: "tea-farm-ops-critical"
+        email_configs:
+          - to: "critical@teafarmops.local"
+            send_resolved: true
+            headers:
+              subject: "🚨 CRITICAL: TeaFarmOps Alert - {{ .GroupLabels.alertname }}"
+        slack_configs:
+          - api_url: "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK"
+            channel: "#tea-farm-ops-critical"
+            title: "🚨 CRITICAL: TeaFarmOps Alert - {{ .GroupLabels.alertname }}"
+            send_resolved: true
+      - name: "tea-farm-ops-warning"
+        email_configs:
+          - to: "warnings@teafarmops.local"
+            send_resolved: true
+            headers:
+              subject: "⚠️ WARNING: TeaFarmOps Alert - {{ .GroupLabels.alertname }}"
+        slack_configs:
+          - api_url: "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK"
+            channel: "#tea-farm-ops-warnings"
+            title: "⚠️ WARNING: TeaFarmOps Alert - {{ .GroupLabels.alertname }}"
+            send_resolved: true
+    inhibit_rules:
+      - source_match:
+          severity: "critical"
+        target_match:
+          severity: "warning"
+        equal: ["alertname", "dev", "instance"]
+    
+  # エクスポーター設定
+  exporters:
+    # Node Exporter (システムメトリクス)
+    node_exporter:
+      enabled: true
+      version: "1.6.1"
+      port: 9100
+      collectors:
+        - "systemd"
+        - "processes"
+        - "filesystem"
+        - "netdev"
+        - "meminfo"
+        - "cpu"
+        - "diskstats"
+        - "loadavg"
+        - "uname"
+        - "vmstat"
+        - "filefd"
+        - "netstat"
+      textfile_directory: "/etc/prometheus/textfile_collector"
+      
+    # Redis Exporter
+    redis_exporter:
+      enabled: true
+      version: "1.55.0"
+      port: 9121
+      redis_addr: "redis://localhost:6379"
+      redis_password: "teafarmops_redis_2024"
+      namespace: "redis"
+      
+    # PostgreSQL Exporter
+    postgres_exporter:
+      enabled: true
+      version: "0.15.0"
+      port: 9187
+      data_source_name: "postgresql://teafarmops:teafarmops_2024@localhost:5432/teafarmops?sslmode=disable"
+      extend_query_path: "/etc/prometheus/postgres_queries.yml"
+      
+    # Nginx Exporter
+    nginx_exporter:
+      enabled: true
+      version: "0.11.0"
+      port: 9113
+      scrape_uri: "http://localhost/nginx_status"
+      
+    # カスタムメトリクスエクスポーター
+    custom_exporter:
+      enabled: true
+      port: 9091
+      metrics_path: "/metrics"
+      scrape_interval: "30s"
+    
+  # アラートルール設定
+  alert_rules:
+    # システムアラート
+    system_alerts:
+      - name: "HighCPUUsage"
+        expr: "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 80"
+        for: "5m"
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes"
+          
+      - name: "HighMemoryUsage"
+        expr: "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85"
+        for: "5m"
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 5 minutes"
+          
+      - name: "HighDiskUsage"
+        expr: "(node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100 > 85"
+        for: "5m"
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is above 85% for more than 5 minutes"
+          
+      - name: "HighSystemLoad"
+        expr: "node_load1 > 5"
+        for: "5m"
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "High system load detected"
+          description: "System load is above 5 for more than 5 minutes"
+          
+      - name: "NetworkErrors"
+        expr: "rate(node_network_receive_errs_total[5m]) > 0.1"
+        for: "5m"
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "Network errors detected"
+          description: "Network receive errors are occurring"
+          
+      - name: "FileDescriptorExhaustion"
+        expr: "node_filefd_allocated / node_filefd_maximum * 100 > 80"
+        for: "5m"
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "File descriptor exhaustion detected"
+          description: "File descriptor usage is above 80%"
+    
+    # データベースアラート
+    database_alerts:
+      - name: "HighPostgreSQLConnections"
+        expr: "pg_stat_database_numbackends > 80"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "database"
+        annotations:
+          summary: "High PostgreSQL connections detected"
+          description: "PostgreSQL has more than 80 active connections"
+          
+      - name: "PostgreSQLDeadlocks"
+        expr: "rate(pg_stat_database_deadlocks[5m]) > 0.1"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "database"
+        annotations:
+          summary: "PostgreSQL deadlocks detected"
+          description: "PostgreSQL is experiencing deadlocks"
+          
+      - name: "PostgreSQLReplicationLag"
+        expr: "pg_replication_lag > 30"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "database"
+        annotations:
+          summary: "PostgreSQL replication lag detected"
+          description: "PostgreSQL replication lag is above 30 seconds"
+          
+      - name: "PostgreSQLSlowQueries"
+        expr: "rate(pg_stat_activity_count{state=\"active\"}[5m]) > 10"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "database"
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "PostgreSQL has more than 10 active queries"
+    
+    # キャッシュアラート
+    cache_alerts:
+      - name: "HighRedisConnections"
+        expr: "redis_connected_clients > 100"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "cache"
+        annotations:
+          summary: "High Redis connections detected"
+          description: "Redis has more than 100 connected clients"
+          
+      - name: "HighRedisMemoryUsage"
+        expr: "redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "cache"
+        annotations:
+          summary: "High Redis memory usage detected"
+          description: "Redis memory usage is above 80%"
+          
+      - name: "HighRedisKeys"
+        expr: "redis_db_keys > 1000000"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "cache"
+        annotations:
+          summary: "High Redis keys detected"
+          description: "Redis has more than 1 million keys"
+          
+      - name: "RedisErrors"
+        expr: "rate(redis_commands_processed_total[5m]) > 0 and rate(redis_commands_processed_total[5m]) < rate(redis_commands_total[5m])"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "cache"
+        annotations:
+          summary: "Redis errors detected"
+          description: "Redis is experiencing command errors"
+    
+    # Webサーバーアラート
+    webserver_alerts:
+      - name: "HighNginxErrorRate"
+        expr: "rate(nginx_http_requests_total{status=~\"5..\"}[5m]) / rate(nginx_http_requests_total[5m]) * 100 > 5"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "webserver"
+        annotations:
+          summary: "High Nginx error rate detected"
+          description: "Nginx error rate is above 5%"
+          
+      - name: "HighNginxResponseTime"
+        expr: "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m])) > 1"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "webserver"
+        annotations:
+          summary: "High Nginx response time detected"
+          description: "Nginx 95th percentile response time is above 1 second"
+          
+      - name: "HighNginxConnections"
+        expr: "nginx_http_connections_active > 1000"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "webserver"
+        annotations:
+          summary: "High Nginx connections detected"
+          description: "Nginx has more than 1000 active connections"
+    
+    # アプリケーションアラート
+    application_alerts:
+      - name: "SpringBootDown"
+        expr: "up{job=\"spring-boot-app\"} == 0"
+        for: "1m"
+        labels:
+          severity: "critical"
+          service: "application"
+        annotations:
+          summary: "Spring Boot application is down"
+          description: "Spring Boot application has been down for more than 1 minute"
+          
+      - name: "SpringBootSlowResponse"
+        expr: "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m])) > 2"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "application"
+        annotations:
+          summary: "Spring Boot slow response detected"
+          description: "Spring Boot 95th percentile response time is above 2 seconds"
+          
+      - name: "SpringBootHighErrorRate"
+        expr: "rate(http_server_requests_total{status=~\"5..\"}[5m]) / rate(http_server_requests_total[5m]) * 100 > 5"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "application"
+        annotations:
+          summary: "Spring Boot high error rate detected"
+          description: "Spring Boot error rate is above 5%"
+          
+      - name: "HighJVMMemoryUsage"
+        expr: "jvm_memory_used_bytes / jvm_memory_max_bytes * 100 > 85"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "application"
+        annotations:
+          summary: "High JVM memory usage detected"
+          description: "JVM memory usage is above 85%"
+          
+      - name: "HighJVMGCTime"
+        expr: "rate(jvm_gc_collection_seconds_sum[5m]) > 0.1"
+        for: "5m"
+        labels:
+          severity: "warning"
+          service: "application"
+        annotations:
+          summary: "High JVM GC time detected"
+          description: "JVM garbage collection time is high"
+    
+  # ダッシュボード設定
+  dashboards:
+    # システムオーバービューダッシュボード
+    system_overview:
+      title: "TeaFarmOps System Overview"
+      tags: ["system", "overview"]
+      refresh: "30s"
+      panels:
+        - title: "CPU Usage"
+          type: "stat"
+          expr: "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)"
+          unit: "percent"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 70
+            - color: "red"
+              value: 85
+        - title: "Memory Usage"
+          type: "stat"
+          expr: "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100"
+          unit: "percent"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 70
+            - color: "red"
+              value: 85
+        - title: "Disk Usage"
+          type: "stat"
+          expr: "(node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100"
+          unit: "percent"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 70
+            - color: "red"
+              value: 85
+        - title: "System Load"
+          type: "graph"
+          targets:
+            - expr: "node_load1"
+              legend: "1m"
+            - expr: "node_load5"
+              legend: "5m"
+            - expr: "node_load15"
+              legend: "15m"
+        - title: "Network Traffic"
+          type: "graph"
+          targets:
+            - expr: "rate(node_network_receive_bytes_total[5m])"
+              legend: "{{device}} - Receive"
+            - expr: "rate(node_network_transmit_bytes_total[5m])"
+              legend: "{{device}} - Transmit"
+    
+    # データベースダッシュボード
+    database_overview:
+      title: "TeaFarmOps Database Overview"
+      tags: ["database", "postgresql"]
+      refresh: "30s"
+      panels:
+        - title: "Active Connections"
+          type: "stat"
+          expr: "pg_stat_database_numbackends"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 50
+            - color: "red"
+              value: 80
+        - title: "Transactions per Second"
+          type: "stat"
+          expr: "rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])"
+          unit: "reqps"
+        - title: "Cache Hit Ratio"
+          type: "stat"
+          expr: "pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read) * 100"
+          unit: "percent"
+          thresholds:
+            - color: "red"
+              value: null
+            - color: "yellow"
+              value: 80
+            - color: "green"
+              value: 95
+        - title: "Database Size"
+          type: "stat"
+          expr: "pg_database_size_bytes"
+          unit: "bytes"
+        - title: "Active Queries"
+          type: "graph"
+          targets:
+            - expr: "pg_stat_activity_count{state=\"active\"}"
+        - title: "Deadlocks"
+          type: "graph"
+          targets:
+            - expr: "rate(pg_stat_database_deadlocks[5m])"
+    
+    # キャッシュダッシュボード
+    cache_overview:
+      title: "TeaFarmOps Cache Overview"
+      tags: ["cache", "redis"]
+      refresh: "30s"
+      panels:
+        - title: "Connected Clients"
+          type: "stat"
+          expr: "redis_connected_clients"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 50
+            - color: "red"
+              value: 100
+        - title: "Memory Usage"
+          type: "stat"
+          expr: "redis_memory_used_bytes / redis_memory_max_bytes * 100"
+          unit: "percent"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 70
+            - color: "red"
+              value: 85
+        - title: "Commands per Second"
+          type: "stat"
+          expr: "rate(redis_commands_processed_total[5m])"
+          unit: "reqps"
+        - title: "Hit Rate"
+          type: "stat"
+          expr: "redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) * 100"
+          unit: "percent"
+          thresholds:
+            - color: "red"
+              value: null
+            - color: "yellow"
+              value: 80
+            - color: "green"
+              value: 95
+        - title: "Commands Over Time"
+          type: "graph"
+          targets:
+            - expr: "rate(redis_commands_processed_total[5m])"
+              legend: "Commands/sec"
+        - title: "Memory Usage Over Time"
+          type: "graph"
+          targets:
+            - expr: "redis_memory_used_bytes"
+              legend: "Memory Used"
+    
+    # Webサーバーダッシュボード
+    webserver_overview:
+      title: "TeaFarmOps Web Server Overview"
+      tags: ["webserver", "nginx"]
+      refresh: "30s"
+      panels:
+        - title: "Requests per Second"
+          type: "stat"
+          expr: "rate(nginx_http_requests_total[5m])"
+          unit: "reqps"
+        - title: "Active Connections"
+          type: "stat"
+          expr: "nginx_http_connections_active"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 500
+            - color: "red"
+              value: 1000
+        - title: "Error Rate"
+          type: "stat"
+          expr: "rate(nginx_http_requests_total{status=~\"5..\"}[5m]) / rate(nginx_http_requests_total[5m]) * 100"
+          unit: "percent"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 1
+            - color: "red"
+              value: 5
+        - title: "Response Time"
+          type: "stat"
+          expr: "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m]))"
+          unit: "s"
+          thresholds:
+            - color: "green"
+              value: null
+            - color: "yellow"
+              value: 0.5
+            - color: "red"
+              value: 1
+        - title: "Requests Over Time"
+          type: "graph"
+          targets:
+            - expr: "rate(nginx_http_requests_total[5m])"
+              legend: "Requests/sec"
+        - title: "Response Time Distribution"
+          type: "graph"
+          targets:
+            - expr: "histogram_quantile(0.5, rate(nginx_http_request_duration_seconds_bucket[5m]))"
+              legend: "50th percentile"
+            - expr: "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m]))"
+              legend: "95th percentile"
+            - expr: "histogram_quantile(0.99, rate(nginx_http_request_duration_seconds_bucket[5m]))"
+              legend: "99th percentile"
+    
+  # 通知設定
+  notifications:
+    # メール通知
+    email:
+      enabled: true
+      smtp_host: "localhost"
+      smtp_port: 587
+      smtp_username: "alertmanager@teafarmops.local"
+      smtp_password: "teafarmops_alert_2024"
+      smtp_from: "alertmanager@teafarmops.local"
+      recipients:
+        team: "team@teafarmops.local"
+        critical: "critical@teafarmops.local"
+        warnings: "warnings@teafarmops.local"
+        database: "database@teafarmops.local"
+        cache: "cache@teafarmops.local"
+        webserver: "webserver@teafarmops.local"
+    
+    # Slack通知
+    slack:
+      enabled: false
+      webhook_url: "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK"
+      channels:
+        alerts: "#tea-farm-ops-alerts"
+        critical: "#tea-farm-ops-critical"
+        warnings: "#tea-farm-ops-warnings"
+        database: "#tea-farm-ops-database"
+        cache: "#tea-farm-ops-cache"
+        webserver: "#tea-farm-ops-webserver"
+    
+    # Webhook通知
+    webhook:
+      enabled: false
+      url: "http://localhost:8080/webhook"
+      timeout: "30s"
+    
+  # ログ設定
+  logging:
+    level: "info"
+    format: "json"
+    file: "/var/log/tea-farm-ops/monitoring/monitoring.log"
+    max_size: "100MB"
+    max_days: 7
+    max_files: 10
+    rotation:
+      enabled: true
+      interval: "daily"
+      compress: true
+    
+  # バックアップ設定
+  backup:
+    enabled: true
+    schedule: "0 2 * * *"  # 毎日午前2時
+    retention_days: 30
+    storage:
+      type: "local"
+      path: "/var/backups/tea-farm-ops/monitoring"
+    components:
+      - "prometheus_data"
+      - "grafana_data"
+      - "alertmanager_data"
+      - "config_files"
+      - "logs"
+    
+  # メンテナンス設定
+  maintenance:
+    enabled: true
+    schedule: "0 3 * * 0"  # 毎週日曜日午前3時
+    tasks:
+      - "cleanup_old_data"
+      - "optimize_database"
+      - "rotate_logs"
+      - "update_dashboards"
+      - "verify_alerts"
+    cleanup:
+      retention_days: 30
+      max_size_gb: 50
+      
+  # セキュリティ設定
+  security:
+    authentication:
+      enabled: true
+      type: "basic"  # basic, oauth, ldap
+      users:
+        - username: "admin"
+          password: "teafarmops_admin_2024"
+          role: "admin"
+        - username: "viewer"
+          password: "teafarmops_viewer_2024"
+          role: "viewer"
+    authorization:
+      enabled: true
+      roles:
+        admin:
+          permissions: ["read", "write", "admin"]
+        viewer:
+          permissions: ["read"]
+    tls:
+      enabled: false
+      cert_file: "/etc/ssl/certs/monitoring.crt"
+      key_file: "/etc/ssl/private/monitoring.key"
+    network:
+      allowed_ips: ["127.0.0.1", "192.168.1.0/24"]
+      firewall_rules:
+        - port: 9090
+          protocol: "tcp"
+          action: "allow"
+        - port: 3001
+          protocol: "tcp"
+          action: "allow"
+        - port: 9093
+          protocol: "tcp"
+          action: "allow"
+    
+  # パフォーマンス設定
+  performance:
+    # Prometheus設定
+    prometheus:
+      max_samples_per_query: 1100000
+      max_concurrent_queries: 20
+      timeout_offset: 2
+      max_look_back_period: 0
+      evaluation_delay: 0
+      default_step: 1
+      default_interval: 15
+      default_global_evaluation_interval: 15
+      
+    # Grafana設定
+    grafana:
+      max_concurrent_connections: 100
+      max_connections_per_host: 10
+      connection_timeout: 30
+      read_timeout: 60
+      write_timeout: 60
+      
+    # Alertmanager設定
+    alertmanager:
+      max_concurrent_requests: 100
+      request_timeout: 30
+      max_retries: 3
+      retry_interval: 10
+      
+  # 環境別設定
+  environments:
+    development:
+      prometheus:
+        retention_time: "7d"
+        retention_size: "10GB"
+      grafana:
+        admin_password: "dev_grafana_2024"
+      alertmanager:
+        repeat_interval: "1h"
+      logging:
+        level: "debug"
+        
+    staging:
+      prometheus:
+        retention_time: "15d"
+        retention_size: "25GB"
+      grafana:
+        admin_password: "staging_grafana_2024"
+      alertmanager:
+        repeat_interval: "2h"
+      logging:
+        level: "info"
+        
+    production:
+      prometheus:
+        retention_time: "30d"
+        retention_size: "100GB"
+      grafana:
+        admin_password: "teafarmops_grafana_2024"
+      alertmanager:
+        repeat_interval: "4h"
+      logging:
+        level: "warn"
+        
+  # 監視対象サービス
+  services:
+    # データベースサービス
+    database:
+      name: "PostgreSQL"
+      type: "database"
+      port: 5432
+      health_check: "pg_isready -h localhost -p 5432"
+      metrics_endpoint: "localhost:9187/metrics"
+      alerts:
+        - "HighPostgreSQLConnections"
+        - "PostgreSQLDeadlocks"
+        - "PostgreSQLReplicationLag"
+        - "PostgreSQLSlowQueries"
+        
+    # キャッシュサービス
+    cache:
+      name: "Redis"
+      type: "cache"
+      port: 6379
+      health_check: "redis-cli ping"
+      metrics_endpoint: "localhost:9121/metrics"
+      alerts:
+        - "HighRedisConnections"
+        - "HighRedisMemoryUsage"
+        - "HighRedisKeys"
+        - "RedisErrors"
+        
+    # Webサーバーサービス
+    webserver:
+      name: "Nginx"
+      type: "webserver"
+      port: 80
+      health_check: "curl -f http://localhost/health"
+      metrics_endpoint: "localhost:9113/metrics"
+      alerts:
+        - "HighNginxErrorRate"
+        - "HighNginxResponseTime"
+        - "HighNginxConnections"
+        
+    # アプリケーションサービス
+    application:
+      name: "Spring Boot"
+      type: "application"
+      port: 8080
+      health_check: "curl -f http://localhost:8080/actuator/health"
+      metrics_endpoint: "localhost:8080/actuator/prometheus"
+      alerts:
+        - "SpringBootDown"
+        - "SpringBootSlowResponse"
+        - "SpringBootHighErrorRate"
+        - "HighJVMMemoryUsage"
+        - "HighJVMGCTime"
+        
+    # フロントエンドサービス
+    frontend:
+      name: "React"
+      type: "frontend"
+      port: 3000
+      health_check: "curl -f http://localhost:3000/health"
+      metrics_endpoint: "localhost:3000/metrics"
+      alerts:
+        - "FrontendDown"
+        - "FrontendSlowResponse"
+        
+  # 統合設定
+  integrations:
+    # 外部監視システム
+    external_monitoring:
+      enabled: false
+      systems:
+        - name: "Nagios"
+          type: "nagios"
+          url: "http://nagios.example.com"
+          api_key: "your_api_key"
+        - name: "Zabbix"
+          type: "zabbix"
+          url: "http://zabbix.example.com"
+          api_key: "your_api_key"
+          
+    # ログ集約システム
+    log_aggregation:
+      enabled: false
+      systems:
+        - name: "ELK Stack"
+          type: "elasticsearch"
+          url: "http://elasticsearch:9200"
+          index: "tea-farm-ops-logs"
+        - name: "Fluentd"
+          type: "fluentd"
+          url: "http://fluentd:24224"
+          tag: "tea-farm-ops"
+          
+    # チケットシステム
+    ticket_system:
+      enabled: false
+      systems:
+        - name: "Jira"
+          type: "jira"
+          url: "https://jira.example.com"
+          username: "monitoring"
+          api_token: "your_api_token"
+        - name: "ServiceNow"
+          type: "servicenow"
+          url: "https://servicenow.example.com"
+          username: "monitoring"
+          password: "your_password"
+          
+  # レポート設定
+  reporting:
+    enabled: true
+    schedule: "0 6 * * 1"  # 毎週月曜日午前6時
+    format: "pdf"  # pdf, html, csv
+    recipients: ["reports@teafarmops.local"]
+    templates:
+      - name: "weekly_summary"
+        title: "TeaFarmOps Weekly Monitoring Summary"
+        sections:
+          - "system_overview"
+          - "service_health"
+          - "alert_summary"
+          - "performance_metrics"
+          - "recommendations"
+      - name: "monthly_report"
+        title: "TeaFarmOps Monthly Monitoring Report"
+        sections:
+          - "executive_summary"
+          - "system_performance"
+          - "service_availability"
+          - "incident_summary"
+          - "capacity_planning"
+          - "improvement_recommendations"
+    
+  # 自動化設定
+  automation:
+    enabled: true
+    actions:
+      # 自動復旧アクション
+      auto_recovery:
+        enabled: true
+        services:
+          - name: "nginx"
+            action: "restart"
+            max_attempts: 3
+            cooldown: "5m"
+          - name: "redis"
+            action: "restart"
+            max_attempts: 2
+            cooldown: "10m"
+          - name: "postgresql"
+            action: "restart"
+            max_attempts: 1
+            cooldown: "30m"
+            
+      # 自動スケーリング
+      auto_scaling:
+        enabled: false
+        rules:
+          - service: "application"
+            metric: "cpu_usage"
+            threshold: 80
+            action: "scale_up"
+            min_instances: 2
+            max_instances: 10
+          - service: "application"
+            metric: "cpu_usage"
+            threshold: 20
+            action: "scale_down"
+            min_instances: 2
+            max_instances: 10
+            
+      # 自動バックアップ
+      auto_backup:
+        enabled: true
+        schedule: "0 2 * * *"  # 毎日午前2時
+        retention: "30d"
+        components:
+          - "database"
+          - "configuration"
+          - "logs"
+          
+  # コンプライアンス設定
+  compliance:
+    enabled: true
+    standards:
+      - name: "ISO 27001"
+        enabled: true
+        requirements:
+          - "access_control"
+          - "audit_logging"
+          - "data_protection"
+      - name: "GDPR"
+        enabled: true
+        requirements:
+          - "data_retention"
+          - "privacy_protection"
+          - "consent_management"
+      - name: "SOX"
+        enabled: false
+        requirements:
+          - "financial_reporting"
+          - "internal_controls"
+          - "audit_trails"
+          
+  # 災害復旧設定
+  disaster_recovery:
+    enabled: true
+    rto: "4h"  # Recovery Time Objective
+    rpo: "1h"  # Recovery Point Objective
+    backup_strategy:
+      type: "incremental"
+      frequency: "daily"
+      retention: "30d"
+    replication:
+      enabled: true
+      type: "asynchronous"
+      target: "backup-site"
+      lag_threshold: "5m"
+    failover:
+      enabled: true
+      automatic: false
+      manual_approval: true
+      notification: true
+      
+  # コスト最適化設定
+  cost_optimization:
+    enabled: true
+    strategies:
+      - name: "data_retention_optimization"
+        enabled: true
+        action: "reduce_retention"
+        target: "reduce_storage_costs"
+      - name: "resource_optimization"
+        enabled: true
+        action: "right_size_resources"
+        target: "reduce_compute_costs"
+      - name: "alert_optimization"
+        enabled: true
+        action: "reduce_noise"
+        target: "reduce_operational_costs"
+    budgets:
+      monthly_storage: 100  # USD
+      monthly_compute: 200  # USD
+      monthly_bandwidth: 50  # USD
+    alerts:
+      - name: "CostThresholdExceeded"
+        metric: "monthly_cost"
+        threshold: 300
+        severity: "warning"
+        
+  # ドキュメント設定
+  documentation:
+    enabled: true
+    auto_generate: true
+    formats: ["markdown", "html", "pdf"]
+    sections:
+      - "installation"
+      - "configuration"
+      - "usage"
+      - "troubleshooting"
+      - "api_reference"
+      - "best_practices"
+    update_schedule: "weekly"
+    version_control: true
+    
+  # サポート設定
+  support:
+    enabled: true
+    channels:
+      - name: "email"
+        address: "support@teafarmops.local"
+        response_time: "24h"
+      - name: "slack"
+        channel: "#tea-farm-ops-support"
+        response_time: "4h"
+      - name: "phone"
+        number: "+1-555-0123"
+        response_time: "1h"
+    escalation:
+      levels:
+        - level: 1
+          response_time: "4h"
+          team: "L1 Support"
+        - level: 2
+          response_time: "2h"
+          team: "L2 Support"
+        - level: 3
+          response_time: "1h"
+          team: "L3 Support"
+    sla:
+      availability: "99.9%"
+      response_time: "4h"
+      resolution_time: "24h" 

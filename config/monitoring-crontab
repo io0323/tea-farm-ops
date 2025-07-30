@@ -1,0 +1,466 @@
+# TeaFarmOps 監視システム強化 - Cronジョブ設定
+# 使用方法: sudo crontab -e でこのファイルを追加
+
+# 環境変数設定
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=admin@teafarmops.local
+
+# ログディレクトリ
+LOG_DIR=/var/log/tea-farm-ops/monitoring
+
+# =============================================================================
+# 毎日の監視タスク
+# =============================================================================
+
+# 毎日午前0時 - 監視システムの状態確認
+0 0 * * * /app/scripts/monitoring-prometheus.sh --monitor >> $LOG_DIR/daily-status.log 2>&1
+
+# 毎日午前1時 - Grafanaダッシュボードの状態確認
+0 1 * * * /app/scripts/monitoring-grafana.sh --monitor >> $LOG_DIR/daily-status.log 2>&1
+
+# 毎日午前2時 - Alertmanagerの状態確認
+0 2 * * * /app/scripts/monitoring-alertmanager.sh --monitor >> $LOG_DIR/daily-status.log 2>&1
+
+# 毎日午前3時 - 監視データのバックアップ
+0 3 * * * /app/scripts/monitoring-backup.sh --daily >> $LOG_DIR/backup.log 2>&1
+
+# 毎日午前4時 - ログローテーション
+0 4 * * * /app/scripts/monitoring-logrotate.sh >> $LOG_DIR/logrotate.log 2>&1
+
+# 毎日午前5時 - 監視システムのパフォーマンスチェック
+0 5 * * * /app/scripts/monitoring-performance.sh --check >> $LOG_DIR/performance.log 2>&1
+
+# 毎日午前6時 - アラートルールの検証
+0 6 * * * /app/scripts/monitoring-validate.sh --rules >> $LOG_DIR/validation.log 2>&1
+
+# 毎日午前7時 - 監視対象サービスのヘルスチェック
+0 7 * * * /app/scripts/monitoring-healthcheck.sh --all >> $LOG_DIR/healthcheck.log 2>&1
+
+# 毎日午前8時 - 監視システムのセキュリティチェック
+0 8 * * * /app/scripts/monitoring-security.sh --audit >> $LOG_DIR/security.log 2>&1
+
+# 毎日午前9時 - 監視メトリクスの分析
+0 9 * * * /app/scripts/monitoring-analytics.sh --daily >> $LOG_DIR/analytics.log 2>&1
+
+# 毎日午前10時 - 監視システムの設定バックアップ
+0 10 * * * /app/scripts/monitoring-config-backup.sh >> $LOG_DIR/config-backup.log 2>&1
+
+# 毎日午前11時 - 監視システムの容量チェック
+0 11 * * * /app/scripts/monitoring-capacity.sh --check >> $LOG_DIR/capacity.log 2>&1
+
+# 毎日午後12時 - 監視システムの接続テスト
+0 12 * * * /app/scripts/monitoring-connectivity.sh --test >> $LOG_DIR/connectivity.log 2>&1
+
+# 毎日午後1時 - 監視システムのレポート生成
+0 13 * * * /app/scripts/monitoring-report.sh --daily >> $LOG_DIR/report.log 2>&1
+
+# 毎日午後2時 - 監視システムのメトリクス集約
+0 14 * * * /app/scripts/monitoring-aggregate.sh --daily >> $LOG_DIR/aggregate.log 2>&1
+
+# 毎日午後3時 - 監視システムのアラート分析
+0 15 * * * /app/scripts/monitoring-alert-analysis.sh --daily >> $LOG_DIR/alert-analysis.log 2>&1
+
+# 毎日午後4時 - 監視システムのパフォーマンス最適化
+0 16 * * * /app/scripts/monitoring-optimize.sh --daily >> $LOG_DIR/optimize.log 2>&1
+
+# 毎日午後5時 - 監視システムのセキュリティ更新
+0 17 * * * /app/scripts/monitoring-security-update.sh >> $LOG_DIR/security-update.log 2>&1
+
+# 毎日午後6時 - 監視システムの設定検証
+0 18 * * * /app/scripts/monitoring-validate.sh --config >> $LOG_DIR/validation.log 2>&1
+
+# 毎日午後7時 - 監視システムのバックアップ検証
+0 19 * * * /app/scripts/monitoring-backup-verify.sh >> $LOG_DIR/backup-verify.log 2>&1
+
+# 毎日午後8時 - 監視システムのメトリクスクリーンアップ
+0 20 * * * /app/scripts/monitoring-cleanup.sh --metrics >> $LOG_DIR/cleanup.log 2>&1
+
+# 毎日午後9時 - 監視システムのログクリーンアップ
+0 21 * * * /app/scripts/monitoring-cleanup.sh --logs >> $LOG_DIR/cleanup.log 2>&1
+
+# 毎日午後10時 - 監視システムの状態サマリー
+0 22 * * * /app/scripts/monitoring-summary.sh --daily >> $LOG_DIR/summary.log 2>&1
+
+# 毎日午後11時 - 監視システムの最終チェック
+0 23 * * * /app/scripts/monitoring-final-check.sh >> $LOG_DIR/final-check.log 2>&1
+
+# =============================================================================
+# 毎時間の監視タスク
+# =============================================================================
+
+# 毎時0分 - 監視システムの基本チェック
+0 * * * * /app/scripts/monitoring-basic-check.sh >> $LOG_DIR/hourly-check.log 2>&1
+
+# 毎時15分 - 監視システムのメトリクス収集
+15 * * * * /app/scripts/monitoring-metrics.sh --collect >> $LOG_DIR/metrics.log 2>&1
+
+# 毎時30分 - 監視システムのアラートチェック
+30 * * * * /app/scripts/monitoring-alert-check.sh >> $LOG_DIR/alert-check.log 2>&1
+
+# 毎時45分 - 監視システムのパフォーマンスモニタリング
+45 * * * * /app/scripts/monitoring-performance.sh --monitor >> $LOG_DIR/performance.log 2>&1
+
+# =============================================================================
+# 毎週の監視タスク
+# =============================================================================
+
+# 毎週日曜日午前0時 - 週次監視レポート生成
+0 0 * * 0 /app/scripts/monitoring-report.sh --weekly >> $LOG_DIR/weekly-report.log 2>&1
+
+# 毎週日曜日午前1時 - 週次メトリクス分析
+0 1 * * 0 /app/scripts/monitoring-analytics.sh --weekly >> $LOG_DIR/weekly-analytics.log 2>&1
+
+# 毎週日曜日午前2時 - 週次アラート分析
+0 2 * * 0 /app/scripts/monitoring-alert-analysis.sh --weekly >> $LOG_DIR/weekly-alert-analysis.log 2>&1
+
+# 毎週日曜日午前3時 - 週次パフォーマンス分析
+0 3 * * 0 /app/scripts/monitoring-performance.sh --weekly >> $LOG_DIR/weekly-performance.log 2>&1
+
+# 毎週日曜日午前4時 - 週次セキュリティ分析
+0 4 * * 0 /app/scripts/monitoring-security.sh --weekly >> $LOG_DIR/weekly-security.log 2>&1
+
+# 毎週日曜日午前5時 - 週次容量分析
+0 5 * * 0 /app/scripts/monitoring-capacity.sh --weekly >> $LOG_DIR/weekly-capacity.log 2>&1
+
+# 毎週日曜日午前6時 - 週次設定検証
+0 6 * * 0 /app/scripts/monitoring-validate.sh --weekly >> $LOG_DIR/weekly-validation.log 2>&1
+
+# 毎週日曜日午前7時 - 週次バックアップ検証
+0 7 * * 0 /app/scripts/monitoring-backup-verify.sh --weekly >> $LOG_DIR/weekly-backup-verify.log 2>&1
+
+# 毎週日曜日午前8時 - 週次クリーンアップ
+0 8 * * 0 /app/scripts/monitoring-cleanup.sh --weekly >> $LOG_DIR/weekly-cleanup.log 2>&1
+
+# 毎週日曜日午前9時 - 週次最適化
+0 9 * * 0 /app/scripts/monitoring-optimize.sh --weekly >> $LOG_DIR/weekly-optimize.log 2>&1
+
+# 毎週日曜日午前10時 - 週次サマリー
+0 10 * * 0 /app/scripts/monitoring-summary.sh --weekly >> $LOG_DIR/weekly-summary.log 2>&1
+
+# =============================================================================
+# 毎月の監視タスク
+# =============================================================================
+
+# 毎月1日午前0時 - 月次監視レポート生成
+0 0 1 * * /app/scripts/monitoring-report.sh --monthly >> $LOG_DIR/monthly-report.log 2>&1
+
+# 毎月1日午前1時 - 月次メトリクス分析
+0 1 1 * * /app/scripts/monitoring-analytics.sh --monthly >> $LOG_DIR/monthly-analytics.log 2>&1
+
+# 毎月1日午前2時 - 月次アラート分析
+0 2 1 * * /app/scripts/monitoring-alert-analysis.sh --monthly >> $LOG_DIR/monthly-alert-analysis.log 2>&1
+
+# 毎月1日午前3時 - 月次パフォーマンス分析
+0 3 1 * * /app/scripts/monitoring-performance.sh --monthly >> $LOG_DIR/monthly-performance.log 2>&1
+
+# 毎月1日午前4時 - 月次セキュリティ分析
+0 4 1 * * /app/scripts/monitoring-security.sh --monthly >> $LOG_DIR/monthly-security.log 2>&1
+
+# 毎月1日午前5時 - 月次容量分析
+0 5 1 * * /app/scripts/monitoring-capacity.sh --monthly >> $LOG_DIR/monthly-capacity.log 2>&1
+
+# 毎月1日午前6時 - 月次設定検証
+0 6 1 * * /app/scripts/monitoring-validate.sh --monthly >> $LOG_DIR/monthly-validation.log 2>&1
+
+# 毎月1日午前7時 - 月次バックアップ検証
+0 7 1 * * /app/scripts/monitoring-backup-verify.sh --monthly >> $LOG_DIR/monthly-backup-verify.log 2>&1
+
+# 毎月1日午前8時 - 月次クリーンアップ
+0 8 1 * * /app/scripts/monitoring-cleanup.sh --monthly >> $LOG_DIR/monthly-cleanup.log 2>&1
+
+# 毎月1日午前9時 - 月次最適化
+0 9 1 * * /app/scripts/monitoring-optimize.sh --monthly >> $LOG_DIR/monthly-optimize.log 2>&1
+
+# 毎月1日午前10時 - 月次サマリー
+0 10 1 * * /app/scripts/monitoring-summary.sh --monthly >> $LOG_DIR/monthly-summary.log 2>&1
+
+# =============================================================================
+# 緊急時監視タスク
+# =============================================================================
+
+# 5分ごと - 緊急時監視チェック（高負荷時）
+*/5 * * * * /app/scripts/monitoring-emergency.sh --check >> $LOG_DIR/emergency.log 2>&1
+
+# 1分ごと - クリティカルアラート監視
+* * * * * /app/scripts/monitoring-critical.sh --monitor >> $LOG_DIR/critical.log 2>&1
+
+# =============================================================================
+# メンテナンスタスク
+# =============================================================================
+
+# 毎週土曜日午前2時 - メンテナンスモード開始
+0 2 * * 6 /app/scripts/monitoring-maintenance.sh --start >> $LOG_DIR/maintenance.log 2>&1
+
+# 毎週土曜日午前4時 - メンテナンスモード終了
+0 4 * * 6 /app/scripts/monitoring-maintenance.sh --stop >> $LOG_DIR/maintenance.log 2>&1
+
+# =============================================================================
+# バックアップタスク
+# =============================================================================
+
+# 毎日午前2時 - 完全バックアップ
+0 2 * * * /app/scripts/monitoring-backup.sh --full >> $LOG_DIR/backup-full.log 2>&1
+
+# 毎週日曜日午前3時 - 増分バックアップ
+0 3 * * 0 /app/scripts/monitoring-backup.sh --incremental >> $LOG_DIR/backup-incremental.log 2>&1
+
+# 毎月1日午前4時 - 差分バックアップ
+0 4 1 * * /app/scripts/monitoring-backup.sh --differential >> $LOG_DIR/backup-differential.log 2>&1
+
+# =============================================================================
+# セキュリティタスク
+# =============================================================================
+
+# 毎日午前8時 - セキュリティスキャン
+0 8 * * * /app/scripts/monitoring-security-scan.sh >> $LOG_DIR/security-scan.log 2>&1
+
+# 毎週月曜日午前9時 - 脆弱性スキャン
+0 9 * * 1 /app/scripts/monitoring-vulnerability-scan.sh >> $LOG_DIR/vulnerability-scan.log 2>&1
+
+# 毎月1日午前10時 - セキュリティ監査
+0 10 1 * * /app/scripts/monitoring-security-audit.sh >> $LOG_DIR/security-audit.log 2>&1
+
+# =============================================================================
+# パフォーマンスタスク
+# =============================================================================
+
+# 毎日午前5時 - パフォーマンステスト
+0 5 * * * /app/scripts/monitoring-performance-test.sh >> $LOG_DIR/performance-test.log 2>&1
+
+# 毎週水曜日午前6時 - 負荷テスト
+0 6 * * 3 /app/scripts/monitoring-load-test.sh >> $LOG_DIR/load-test.log 2>&1
+
+# 毎月15日午前7時 - ストレステスト
+0 7 15 * * /app/scripts/monitoring-stress-test.sh >> $LOG_DIR/stress-test.log 2>&1
+
+# =============================================================================
+# 通知タスク
+# =============================================================================
+
+# 毎日午前9時 - 日次通知送信
+0 9 * * * /app/scripts/monitoring-notify.sh --daily >> $LOG_DIR/notify.log 2>&1
+
+# 毎週月曜日午前10時 - 週次通知送信
+0 10 * * 1 /app/scripts/monitoring-notify.sh --weekly >> $LOG_DIR/notify.log 2>&1
+
+# 毎月1日午前11時 - 月次通知送信
+0 11 1 * * /app/scripts/monitoring-notify.sh --monthly >> $LOG_DIR/notify.log 2>&1
+
+# =============================================================================
+# 統合タスク
+# =============================================================================
+
+# 毎日午前12時 - 外部システム統合
+0 12 * * * /app/scripts/monitoring-integration.sh --sync >> $LOG_DIR/integration.log 2>&1
+
+# 毎週金曜日午後2時 - 外部システムレポート送信
+0 14 * * 5 /app/scripts/monitoring-integration.sh --report >> $LOG_DIR/integration.log 2>&1
+
+# =============================================================================
+# コンプライアンスタスク
+# =============================================================================
+
+# 毎日午後3時 - コンプライアンスチェック
+0 15 * * * /app/scripts/monitoring-compliance.sh --check >> $LOG_DIR/compliance.log 2>&1
+
+# 毎週火曜日午後4時 - コンプライアンスレポート生成
+0 16 * * 2 /app/scripts/monitoring-compliance.sh --report >> $LOG_DIR/compliance.log 2>&1
+
+# 毎月1日午後5時 - コンプライアンス監査
+0 17 1 * * /app/scripts/monitoring-compliance.sh --audit >> $LOG_DIR/compliance.log 2>&1
+
+# =============================================================================
+# 災害復旧タスク
+# =============================================================================
+
+# 毎日午後6時 - 災害復旧チェック
+0 18 * * * /app/scripts/monitoring-disaster-recovery.sh --check >> $LOG_DIR/disaster-recovery.log 2>&1
+
+# 毎週木曜日午後7時 - 災害復旧テスト
+0 19 * * 4 /app/scripts/monitoring-disaster-recovery.sh --test >> $LOG_DIR/disaster-recovery.log 2>&1
+
+# 毎月1日午後8時 - 災害復旧計画更新
+0 20 1 * * /app/scripts/monitoring-disaster-recovery.sh --update >> $LOG_DIR/disaster-recovery.log 2>&1
+
+# =============================================================================
+# コスト最適化タスク
+# =============================================================================
+
+# 毎日午後9時 - コスト分析
+0 21 * * * /app/scripts/monitoring-cost-analysis.sh --daily >> $LOG_DIR/cost-analysis.log 2>&1
+
+# 毎週金曜日午後10時 - コスト最適化提案
+0 22 * * 5 /app/scripts/monitoring-cost-optimization.sh --propose >> $LOG_DIR/cost-optimization.log 2>&1
+
+# 毎月1日午後11時 - コストレポート生成
+0 23 1 * * /app/scripts/monitoring-cost-analysis.sh --report >> $LOG_DIR/cost-analysis.log 2>&1
+
+# =============================================================================
+# ドキュメントタスク
+# =============================================================================
+
+# 毎週土曜日午前11時 - ドキュメント更新
+0 11 * * 6 /app/scripts/monitoring-documentation.sh --update >> $LOG_DIR/documentation.log 2>&1
+
+# 毎月1日午前12時 - ドキュメント生成
+0 12 1 * * /app/scripts/monitoring-documentation.sh --generate >> $LOG_DIR/documentation.log 2>&1
+
+# =============================================================================
+# サポートタスク
+# =============================================================================
+
+# 毎日午後11時 - サポートチケット更新
+0 23 * * * /app/scripts/monitoring-support.sh --update >> $LOG_DIR/support.log 2>&1
+
+# 毎週月曜日午前8時 - サポートレポート生成
+0 8 * * 1 /app/scripts/monitoring-support.sh --report >> $LOG_DIR/support.log 2>&1
+
+# =============================================================================
+# ログ管理タスク
+# =============================================================================
+
+# 毎時0分 - ログローテーション
+0 * * * * /app/scripts/monitoring-logrotate.sh --hourly >> $LOG_DIR/logrotate.log 2>&1
+
+# 毎日午前4時 - ログクリーンアップ
+0 4 * * * /app/scripts/monitoring-logrotate.sh --daily >> $LOG_DIR/logrotate.log 2>&1
+
+# 毎週日曜日午前5時 - ログアーカイブ
+0 5 * * 0 /app/scripts/monitoring-logrotate.sh --weekly >> $LOG_DIR/logrotate.log 2>&1
+
+# 毎月1日午前6時 - ログ圧縮
+0 6 1 * * /app/scripts/monitoring-logrotate.sh --monthly >> $LOG_DIR/logrotate.log 2>&1
+
+# =============================================================================
+# 監視システム自己監視タスク
+# =============================================================================
+
+# 毎分 - 監視システム自己監視
+* * * * * /app/scripts/monitoring-self-monitor.sh >> $LOG_DIR/self-monitor.log 2>&1
+
+# 毎時30分 - 監視システム健全性チェック
+30 * * * * /app/scripts/monitoring-health.sh --system >> $LOG_DIR/system-health.log 2>&1
+
+# 毎日午前1時 - 監視システム完全診断
+0 1 * * * /app/scripts/monitoring-diagnostic.sh --full >> $LOG_DIR/diagnostic.log 2>&1
+
+# =============================================================================
+# 環境別タスク
+# =============================================================================
+
+# 開発環境 - 毎日午前9時
+0 9 * * * /app/scripts/monitoring-environment.sh --dev >> $LOG_DIR/dev-environment.log 2>&1
+
+# ステージング環境 - 毎日午前10時
+0 10 * * * /app/scripts/monitoring-environment.sh --staging >> $LOG_DIR/staging-environment.log 2>&1
+
+# 本番環境 - 毎日午前11時
+0 11 * * * /app/scripts/monitoring-environment.sh --production >> $LOG_DIR/production-environment.log 2>&1
+
+# =============================================================================
+# サービス別監視タスク
+# =============================================================================
+
+# データベースサービス - 毎分
+* * * * * /app/scripts/monitoring-service.sh --database >> $LOG_DIR/database-service.log 2>&1
+
+# キャッシュサービス - 毎分
+* * * * * /app/scripts/monitoring-service.sh --cache >> $LOG_DIR/cache-service.log 2>&1
+
+# Webサーバーサービス - 毎分
+* * * * * /app/scripts/monitoring-service.sh --webserver >> $LOG_DIR/webserver-service.log 2>&1
+
+# アプリケーションサービス - 毎分
+* * * * * /app/scripts/monitoring-service.sh --application >> $LOG_DIR/application-service.log 2>&1
+
+# フロントエンドサービス - 毎分
+* * * * * /app/scripts/monitoring-service.sh --frontend >> $LOG_DIR/frontend-service.log 2>&1
+
+# =============================================================================
+# 自動復旧タスク
+# =============================================================================
+
+# 自動復旧チェック - 毎分
+* * * * * /app/scripts/monitoring-auto-recovery.sh --check >> $LOG_DIR/auto-recovery.log 2>&1
+
+# 自動復旧実行 - 5分ごと
+*/5 * * * * /app/scripts/monitoring-auto-recovery.sh --execute >> $LOG_DIR/auto-recovery.log 2>&1
+
+# =============================================================================
+# 容量管理タスク
+# =============================================================================
+
+# 容量チェック - 毎時
+0 * * * * /app/scripts/monitoring-capacity.sh --check >> $LOG_DIR/capacity.log 2>&1
+
+# 容量予測 - 毎日午前7時
+0 7 * * * /app/scripts/monitoring-capacity.sh --predict >> $LOG_DIR/capacity.log 2>&1
+
+# 容量最適化 - 毎週日曜日午前8時
+0 8 * * 0 /app/scripts/monitoring-capacity.sh --optimize >> $LOG_DIR/capacity.log 2>&1
+
+# =============================================================================
+# アラート管理タスク
+# =============================================================================
+
+# アラート分析 - 毎時
+0 * * * * /app/scripts/monitoring-alert-analysis.sh --hourly >> $LOG_DIR/alert-analysis.log 2>&1
+
+# アラート最適化 - 毎日午前8時
+0 8 * * * /app/scripts/monitoring-alert-analysis.sh --optimize >> $LOG_DIR/alert-analysis.log 2>&1
+
+# アラート抑制 - 毎週月曜日午前9時
+0 9 * * 1 /app/scripts/monitoring-alert-analysis.sh --suppress >> $LOG_DIR/alert-analysis.log 2>&1
+
+# =============================================================================
+# メトリクス管理タスク
+# =============================================================================
+
+# メトリクス収集 - 毎分
+* * * * * /app/scripts/monitoring-metrics.sh --collect >> $LOG_DIR/metrics.log 2>&1
+
+# メトリクス分析 - 毎時
+0 * * * * /app/scripts/monitoring-metrics.sh --analyze >> $LOG_DIR/metrics.log 2>&1
+
+# メトリクス最適化 - 毎日午前6時
+0 6 * * * /app/scripts/monitoring-metrics.sh --optimize >> $LOG_DIR/metrics.log 2>&1
+
+# =============================================================================
+# 設定管理タスク
+# =============================================================================
+
+# 設定バックアップ - 毎日午前10時
+0 10 * * * /app/scripts/monitoring-config-backup.sh >> $LOG_DIR/config-backup.log 2>&1
+
+# 設定検証 - 毎日午後6時
+0 18 * * * /app/scripts/monitoring-validate.sh --config >> $LOG_DIR/validation.log 2>&1
+
+# 設定更新 - 毎週土曜日午前11時
+0 11 * * 6 /app/scripts/monitoring-config-update.sh >> $LOG_DIR/config-update.log 2>&1
+
+# =============================================================================
+# レポート管理タスク
+# =============================================================================
+
+# 日次レポート - 毎日午後1時
+0 13 * * * /app/scripts/monitoring-report.sh --daily >> $LOG_DIR/report.log 2>&1
+
+# 週次レポート - 毎週日曜日午前0時
+0 0 * * 0 /app/scripts/monitoring-report.sh --weekly >> $LOG_DIR/report.log 2>&1
+
+# 月次レポート - 毎月1日午前0時
+0 0 1 * * /app/scripts/monitoring-report.sh --monthly >> $LOG_DIR/report.log 2>&1
+
+# =============================================================================
+# 統合管理タスク
+# =============================================================================
+
+# 外部システム同期 - 毎時
+0 * * * * /app/scripts/monitoring-integration.sh --sync >> $LOG_DIR/integration.log 2>&1
+
+# 外部システムレポート - 毎週金曜日午後2時
+0 14 * * 5 /app/scripts/monitoring-integration.sh --report >> $LOG_DIR/integration.log 2>&1
+
+# 外部システム監査 - 毎月1日午後3時
+0 15 1 * * /app/scripts/monitoring-integration.sh --audit >> $LOG_DIR/integration.log 2>&1 

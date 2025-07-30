@@ -19,7 +19,6 @@ import java.io.IOException;
  * JWT認証フィルター
  * リクエストからJWTトークンを抽出し、認証を処理
  */
-@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   @Autowired

@@ -17,9 +17,10 @@ public class Task {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank(message = "タスクタイプは必須です")
+  @NotNull(message = "タスクタイプは必須です")
+  @Enumerated(EnumType.STRING)
   @Column(name = "task_type", nullable = false)
-  private String taskType;
+  private TaskType taskType;
 
   @NotNull(message = "フィールドは必須です")
   @ManyToOne(fetch = FetchType.LAZY)
@@ -43,29 +44,13 @@ public class Task {
   @Column(columnDefinition = "TEXT")
   private String notes;
 
-  // タスクステータスの列挙型
-  public enum TaskStatus {
-    PENDING("未着手"),
-    IN_PROGRESS("進行中"),
-    COMPLETED("完了"),
-    CANCELLED("キャンセル");
 
-    private final String displayName;
-
-    TaskStatus(String displayName) {
-      this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-      return displayName;
-    }
-  }
 
   // デフォルトコンストラクタ
   public Task() {}
 
   // コンストラクタ
-  public Task(String taskType, Field field, String assignedWorker, 
+  public Task(TaskType taskType, Field field, String assignedWorker, 
               LocalDate startDate, LocalDate endDate, TaskStatus status, String notes) {
     this.taskType = taskType;
     this.field = field;
@@ -85,11 +70,11 @@ public class Task {
     this.id = id;
   }
 
-  public String getTaskType() {
+  public TaskType getTaskType() {
     return taskType;
   }
 
-  public void setTaskType(String taskType) {
+  public void setTaskType(TaskType taskType) {
     this.taskType = taskType;
   }
 

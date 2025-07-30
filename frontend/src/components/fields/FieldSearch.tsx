@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Card,
   CardContent,
-  Grid,
   TextField,
   FormControl,
   InputLabel,
@@ -72,70 +71,62 @@ const FieldSearch: React.FC<FieldSearchProps> = ({ onSearch, onClear }) => {
           フィールド検索
         </Typography>
         
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
-              label="フィールド名"
-              value={filters.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              size="small"
-            />
-          </Grid>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' }, gap: 2, alignItems: 'center' }}>
+          <TextField
+            fullWidth
+            label="フィールド名"
+            value={filters.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            size="small"
+          />
           
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
-              label="場所"
-              value={filters.location}
-              onChange={(e) => handleChange('location', e.target.value)}
-              size="small"
-            />
-          </Grid>
+          <TextField
+            fullWidth
+            label="場所"
+            value={filters.location}
+            onChange={(e) => handleChange('location', e.target.value)}
+            size="small"
+          />
           
-          <Grid item xs={12} sm={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>土壌タイプ</InputLabel>
-              <Select
-                value={filters.soilType}
-                onChange={(e) => handleChange('soilType', e.target.value)}
-                label="土壌タイプ"
-              >
-                <MenuItem value="">
-                  <em>すべて</em>
+          <FormControl fullWidth size="small">
+            <InputLabel>土壌タイプ</InputLabel>
+            <Select
+              value={filters.soilType}
+              onChange={(e) => handleChange('soilType', e.target.value)}
+              label="土壌タイプ"
+            >
+              <MenuItem value="">
+                <em>すべて</em>
+              </MenuItem>
+              {soilTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
                 </MenuItem>
-                {soilTypes.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+              ))}
+            </Select>
+          </FormControl>
           
-          <Grid item xs={12} sm={3}>
-            <Box display="flex" gap={1}>
-              <Button
-                variant="contained"
-                startIcon={<SearchIcon />}
-                onClick={handleSearch}
-                disabled={!hasActiveFilters}
-                size="small"
-              >
-                検索
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<ClearIcon />}
-                onClick={handleClear}
-                disabled={!hasActiveFilters}
-                size="small"
-              >
-                クリア
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+          <Box display="flex" gap={1}>
+            <Button
+              variant="contained"
+              startIcon={<SearchIcon />}
+              onClick={handleSearch}
+              disabled={!hasActiveFilters}
+              size="small"
+            >
+              検索
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ClearIcon />}
+              onClick={handleClear}
+              disabled={!hasActiveFilters}
+              size="small"
+            >
+              クリア
+            </Button>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

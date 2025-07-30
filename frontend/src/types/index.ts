@@ -31,7 +31,8 @@ export enum TaskType {
 export interface Task {
   id: number;
   taskType: TaskType;
-  field: Field;
+  fieldId: number;
+  fieldName: string;
   assignedWorker: string;
   startDate: string;
   endDate: string;
@@ -51,7 +52,8 @@ export enum TeaGrade {
 
 export interface HarvestRecord {
   id: number;
-  field: Field;
+  fieldId: number;
+  fieldName: string;
   harvestDate: string;
   quantityKg: number;
   teaGrade: TeaGrade;
@@ -64,7 +66,8 @@ export interface HarvestRecord {
 export interface WeatherObservation {
   id: number;
   date: string;
-  field: Field;
+  fieldId: number;
+  fieldName: string;
   temperature: number;
   rainfall: number;
   humidity: number;

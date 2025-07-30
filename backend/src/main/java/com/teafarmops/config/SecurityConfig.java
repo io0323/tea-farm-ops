@@ -1,6 +1,7 @@
 package com.teafarmops.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,7 +10,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,115 +17,103 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-/**
- * Spring Security設定クラス
- * アプリケーションのセキュリティ設定を管理
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-  @Autowired
-  private JwtAuthenticationFilter jwtAuthFilter;
+  private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-  /**
-   * セキュリティフィルターチェーンを設定
-   * @param http HttpSecurity
-   * @return SecurityFilterChain
-   * @throws Exception 例外
-   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    logger.info("=== SECURITY CONFIG: Configuring security filter chain ===");
+    
     http
-        .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests((requests) -> requests
-            .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .anyRequest().permitAll()
         )
         .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        .httpBasic(basic -> basic.disable())
+        .formLogin(form -> form.disable());
 
+    logger.info("=== SECURITY CONFIG: Security filter chain configured successfully ===");
     return http.build();
   }
 
-  /**
-   * CORS設定
-   * @return CorsConfigurationSource
-   */
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    logger.info("=== SECURITY CONFIG: Creating AuthenticationManager ===");
+    return config.getAuthenticationManager();
+  }
+
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    logger.info("=== SECURITY CONFIG: Creating AuthenticationProvider ===");
+    
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(userDetailsService());
+    authProvider.setPasswordEncoder(passwordEncoder());
+    authProvider.setHideUserNotFoundExceptions(false);
+    
+    logger.info("=== SECURITY CONFIG: AuthenticationProvider created successfully ===");
+    return authProvider;
+  }
+
+  @Bean
+  public UserDetailsService userDetailsService() {
+    logger.info("=== SECURITY CONFIG: Creating UserDetailsService ===");
+    
+    String adminPassword = passwordEncoder().encode("admin123");
+    String userPassword = passwordEncoder().encode("user123");
+    
+    logger.info("=== SECURITY CONFIG: Encoded admin password: {} ===", adminPassword);
+    logger.info("=== SECURITY CONFIG: Encoded user password: {} ===", userPassword);
+    
+    UserDetails admin = User.builder()
+        .username("admin")
+        .password(adminPassword)
+        .roles("ADMIN")
+        .build();
+    
+    UserDetails user = User.builder()
+        .username("user")
+        .password(userPassword)
+        .roles("USER")
+        .build();
+    
+    logger.info("=== SECURITY CONFIG: Created users: admin (ADMIN), user (USER) ===");
+    
+    return new InMemoryUserDetailsManager(admin, user);
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    logger.info("=== SECURITY CONFIG: Creating PasswordEncoder ===");
+    return new BCryptPasswordEncoder();
+  }
+
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
+    logger.info("=== SECURITY CONFIG: Creating CORS configuration ===");
+    
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOriginPatterns(Arrays.asList("*"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("*"));
     configuration.setAllowCredentials(true);
+    configuration.setMaxAge(3600L);
     
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
+    
+    logger.info("=== SECURITY CONFIG: CORS configuration created successfully ===");
     return source;
-  }
-
-  /**
-   * 認証プロバイダーを設定
-   * @return AuthenticationProvider
-   */
-  @Bean
-  public AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService());
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
-  }
-
-  /**
-   * 認証マネージャーを設定
-   * @param config AuthenticationConfiguration
-   * @return AuthenticationManager
-   * @throws Exception 例外
-   */
-  @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-    return config.getAuthenticationManager();
-  }
-
-  /**
-   * パスワードエンコーダーを設定
-   * @return PasswordEncoder
-   */
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-
-  /**
-   * ユーザー詳細サービスを設定
-   * @return UserDetailsService
-   */
-  @Bean
-  public UserDetailsService userDetailsService() {
-    UserDetails admin = User.builder()
-        .username("admin")
-        .password(passwordEncoder().encode("admin123"))
-        .roles("ADMIN")
-        .build();
-
-    UserDetails worker = User.builder()
-        .username("worker")
-        .password(passwordEncoder().encode("worker123"))
-        .roles("WORKER")
-        .build();
-
-    return new InMemoryUserDetailsManager(admin, worker);
   }
 } 

@@ -4,21 +4,22 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * JWT認証設定クラス
- * JWTトークンの生成・検証を管理
- */
 @Component
 public class JwtConfig {
+
+  private static final Logger logger = LoggerFactory.getLogger(JwtConfig.class);
 
   @Value("${jwt.secret:defaultSecretKey}")
   private String secret;
@@ -27,69 +28,75 @@ public class JwtConfig {
   private long expiration;
 
   private SecretKey getSigningKey() {
-    return Keys.hmacShaKeyFor(secret.getBytes());
+    logger.info("=== JWT CONFIG: Creating signing key ===");
+    logger.info("=== JWT CONFIG: Secret length: {} ===", secret.length());
+    logger.info("=== JWT CONFIG: Secret bytes length: {} ===", secret.getBytes(StandardCharsets.UTF_8).length);
+    
+    try {
+      SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+      logger.info("=== JWT CONFIG: Signing key created successfully ===");
+      return key;
+    } catch (Exception e) {
+      logger.error("=== JWT CONFIG: Error creating signing key: {} ===", e.getMessage());
+      throw e;
+    }
   }
 
-  /**
-   * ユーザー名からJWTトークンを生成
-   * @param username ユーザー名
-   * @return JWTトークン
-   */
   public String generateToken(String username) {
-    Map<String, Object> claims = new HashMap<>();
-    return createToken(claims, username);
+    logger.info("=== JWT CONFIG: Generating token for user: {} ===", username);
+    
+    try {
+      Map<String, Object> claims = new HashMap<>();
+      String token = createToken(claims, username);
+      logger.info("=== JWT CONFIG: Token generated successfully for user: {} ===", username);
+      return token;
+    } catch (Exception e) {
+      logger.error("=== JWT CONFIG: Error generating token for user {}: {} ===", username, e.getMessage());
+      logger.error("=== JWT CONFIG: Exception type: {} ===", e.getClass().getSimpleName());
+      logger.error("=== JWT CONFIG: Exception stack trace: ===", e);
+      throw e;
+    }
   }
 
-  /**
-   * JWTトークンを作成
-   * @param claims クレーム
-   * @param subject サブジェクト（ユーザー名）
-   * @return JWTトークン
-   */
   private String createToken(Map<String, Object> claims, String subject) {
-    return Jwts.builder()
-        .setClaims(claims)
-        .setSubject(subject)
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + expiration))
-        .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-        .compact();
+    logger.info("=== JWT CONFIG: Creating token for subject: {} ===", subject);
+    logger.info("=== JWT CONFIG: Expiration time: {} ms ===", expiration);
+    
+    try {
+      SecretKey signingKey = getSigningKey();
+      logger.info("=== JWT CONFIG: Using signing key algorithm: {} ===", signingKey.getAlgorithm());
+      
+      String token = Jwts.builder()
+          .setClaims(claims)
+          .setSubject(subject)
+          .setIssuedAt(new Date(System.currentTimeMillis()))
+          .setExpiration(new Date(System.currentTimeMillis() + expiration))
+          .signWith(signingKey, SignatureAlgorithm.HS256)
+          .compact();
+      
+      logger.info("=== JWT CONFIG: Token created successfully ===");
+      return token;
+    } catch (Exception e) {
+      logger.error("=== JWT CONFIG: Error creating token: {} ===", e.getMessage());
+      logger.error("=== JWT CONFIG: Exception type: {} ===", e.getClass().getSimpleName());
+      logger.error("=== JWT CONFIG: Exception stack trace: ===", e);
+      throw e;
+    }
   }
 
-  /**
-   * トークンからユーザー名を取得
-   * @param token JWTトークン
-   * @return ユーザー名
-   */
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
   }
 
-  /**
-   * トークンの有効期限を取得
-   * @param token JWTトークン
-   * @return 有効期限
-   */
   public Date extractExpiration(String token) {
     return extractClaim(token, Claims::getExpiration);
   }
 
-  /**
-   * トークンからクレームを取得
-   * @param token JWTトークン
-   * @param claimsResolver クレーム解決関数
-   * @return クレーム
-   */
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
   }
 
-  /**
-   * トークンから全クレームを取得
-   * @param token JWTトークン
-   * @return 全クレーム
-   */
   private Claims extractAllClaims(String token) {
     return Jwts.parserBuilder()
         .setSigningKey(getSigningKey())
@@ -98,21 +105,10 @@ public class JwtConfig {
         .getBody();
   }
 
-  /**
-   * トークンが有効期限切れかチェック
-   * @param token JWTトークン
-   * @return 有効期限切れの場合true
-   */
   private Boolean isTokenExpired(String token) {
     return extractExpiration(token).before(new Date());
   }
 
-  /**
-   * トークンの有効性を検証
-   * @param token JWTトークン
-   * @param username ユーザー名
-   * @return 有効な場合true
-   */
   public Boolean validateToken(String token, String username) {
     final String extractedUsername = extractUsername(token);
     return (extractedUsername.equals(username) && !isTokenExpired(token));

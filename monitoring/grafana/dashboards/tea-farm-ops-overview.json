@@ -1,0 +1,231 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TeaFarmOps Overview",
+    "tags": ["tea-farm-ops", "overview"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "システム概要",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"spring-boot-app\"}",
+            "legendFormat": "Spring Boot"
+          },
+          {
+            "expr": "up{job=\"postgres-exporter\"}",
+            "legendFormat": "PostgreSQL"
+          },
+          {
+            "expr": "up{job=\"nginx-exporter\"}",
+            "legendFormat": "Nginx"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "CPU使用率",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 85}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "メモリ使用率",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "Memory %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 85}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "HTTP リクエスト数",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "レスポンス時間",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (seconds)",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "データベース接続数",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "{{datname}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "JVM ヒープ使用率",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "jvm_memory_used_bytes{area=\"heap\"} / jvm_memory_max_bytes{area=\"heap\"} * 100",
+            "legendFormat": "Heap %"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Heap Usage (%)",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "アクティブユーザー数",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "tea_farm_ops_active_users",
+            "legendFormat": "Active Users"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "gradient-gauge"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 24}
+      },
+      {
+        "id": 9,
+        "title": "エラー率",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(tea_farm_ops_errors_total[5m])",
+            "legendFormat": "Errors/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.01},
+                {"color": "red", "value": 0.1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 24}
+      },
+      {
+        "id": 10,
+        "title": "ディスク使用率",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "(node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100",
+            "legendFormat": "{{mountpoint}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Disk Usage (%)",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+} 

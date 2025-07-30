@@ -2,7 +2,7 @@ package com.teafarmops.controllers;
 
 import com.teafarmops.entities.Field;
 import com.teafarmops.entities.Task;
-import com.teafarmops.entities.Task.TaskStatus;
+import com.teafarmops.entities.TaskStatus;
 import com.teafarmops.services.FieldService;
 import com.teafarmops.services.TaskService;
 import jakarta.validation.Valid;

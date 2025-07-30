@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 interface UseDataFetchingOptions {
@@ -22,7 +22,7 @@ export const useDataFetching = ({
 }: UseDataFetchingOptions) => {
   const dispatch = useAppDispatch();
   const data = useAppSelector(selector);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastFetchRef = useRef<number>(0);
 
   const fetchData = useCallback(() => {
@@ -81,7 +81,7 @@ export const useInfiniteScroll = (
   hasMore: boolean,
   loading: boolean
 ) => {
-  const observerRef = useRef<IntersectionObserver>();
+  const observerRef = useRef<IntersectionObserver | undefined>(undefined);
 
   const lastElementRef = useCallback(
     (node: HTMLElement | null) => {

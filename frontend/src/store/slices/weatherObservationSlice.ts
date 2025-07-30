@@ -1,44 +1,44 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { WeatherObservation } from '../../types';
-import { apiClient } from '../../services/apiClient';
+import { apiClient } from '../../services/api';
 
 // 非同期アクション
 export const fetchWeatherObservations = createAsyncThunk(
   'weatherObservations/fetchWeatherObservations',
   async () => {
-    const response = await apiClient.get('/api/weather-observations');
-    return response.data;
+    const response = await apiClient.getWeatherObservations();
+    return response;
   }
 );
 
 export const fetchWeatherObservationById = createAsyncThunk(
   'weatherObservations/fetchWeatherObservationById',
   async (id: number) => {
-    const response = await apiClient.get(`/api/weather-observations/${id}`);
-    return response.data;
+    const response = await apiClient.getWeatherObservation(id);
+    return response;
   }
 );
 
 export const createWeatherObservation = createAsyncThunk(
   'weatherObservations/createWeatherObservation',
   async (observation: Omit<WeatherObservation, 'id'>) => {
-    const response = await apiClient.post('/api/weather-observations', observation);
-    return response.data;
+    const response = await apiClient.createWeatherObservation(observation);
+    return response;
   }
 );
 
 export const updateWeatherObservation = createAsyncThunk(
   'weatherObservations/updateWeatherObservation',
   async ({ id, observation }: { id: number; observation: Partial<WeatherObservation> }) => {
-    const response = await apiClient.put(`/api/weather-observations/${id}`, observation);
-    return response.data;
+    const response = await apiClient.updateWeatherObservation(id, observation);
+    return response;
   }
 );
 
 export const deleteWeatherObservation = createAsyncThunk(
   'weatherObservations/deleteWeatherObservation',
   async (id: number) => {
-    await apiClient.delete(`/api/weather-observations/${id}`);
+    await apiClient.deleteWeatherObservation(id);
     return id;
   }
 );

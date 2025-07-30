@@ -1,0 +1,374 @@
+# TeaFarmOps パフォーマンス最適化設定ファイル
+# 使用方法: このファイルを /etc/tea-farm-ops/performance-config.yml に配置
+
+# パフォーマンスシステム全体の設定
+performance:
+  enabled: true
+  mode: "production"
+  auto_optimize: true
+  monitoring_interval: 300  # 5分
+  optimization_schedule: "daily"
+  notifications:
+    email_enabled: true
+    slack_enabled: true
+    notify_on_optimization: true
+    notify_on_alert: true
+
+# キャッシュシステム設定
+cache:
+  enabled: true
+  type: "redis"
+  redis:
+    host: "127.0.0.1"
+    port: 6379
+    password: "${REDIS_PASSWORD:-teafarmops_redis_2024}"
+    database: 0
+    max_memory: "256mb"
+    max_memory_policy: "allkeys-lru"
+    persistence:
+      enabled: true
+      rdb: true
+      aof: false
+    sentinel:
+      enabled: true
+      port: 26379
+      quorum: 2
+  optimization:
+    auto_cleanup: true
+    cleanup_interval: 3600  # 1時間
+    memory_threshold: 80    # 80%使用時に警告
+    key_expiration:
+      session: 3600         # 1時間
+      api_cache: 300        # 5分
+      static_cache: 86400   # 24時間
+
+# データベース最適化設定
+database:
+  enabled: true
+  type: "postgresql"
+  postgresql:
+    host: "localhost"
+    port: 5432
+    database: "teafarmops"
+    user: "teafarmops"
+    password: "${DB_PASSWORD:-teafarmops_2024}"
+    connection_pool:
+      min_connections: 5
+      max_connections: 20
+      idle_timeout: 300
+  optimization:
+    auto_vacuum: true
+    auto_analyze: true
+    vacuum_schedule: "daily"
+    analyze_schedule: "daily"
+    index_optimization: true
+    index_rebuild_interval: "weekly"
+    configuration:
+      shared_buffers_percent: 25
+      effective_cache_size_percent: 75
+      work_mem_percent: 2
+      maintenance_work_mem_percent: 5
+      checkpoint_completion_target: 0.9
+      wal_buffers: "16MB"
+      default_statistics_target: 100
+      random_page_cost: 1.1
+      effective_io_concurrency: 200
+
+# Webサーバー最適化設定
+webserver:
+  enabled: true
+  type: "nginx"
+  nginx:
+    worker_processes: "auto"
+    worker_connections: 1024
+    keepalive_timeout: 65
+    keepalive_requests: 100
+    client_max_body_size: "10m"
+    gzip:
+      enabled: true
+      level: 6
+      min_length: 1024
+      types:
+        - "text/plain"
+        - "text/css"
+        - "text/xml"
+        - "text/javascript"
+        - "application/json"
+        - "application/javascript"
+        - "application/xml+rss"
+        - "application/atom+xml"
+        - "image/svg+xml"
+    ssl:
+      enabled: true
+      protocols: ["TLSv1.2", "TLSv1.3"]
+      ciphers: "ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512"
+      session_cache: "shared:SSL:10m"
+      session_timeout: "10m"
+      ocsp_stapling: true
+      hsts: true
+      hsts_max_age: 63072000
+    proxy:
+      enabled: true
+      buffer_size: "4k"
+      buffers: 8
+      busy_buffers_size: "8k"
+      cache:
+        enabled: true
+        path: "/var/cache/nginx/proxy"
+        max_size: "10g"
+        inactive: "60m"
+    rate_limiting:
+      enabled: true
+      api_zone: "api"
+      api_rate: "10r/s"
+      api_burst: 20
+      login_zone: "login"
+      login_rate: "1r/s"
+      login_burst: 5
+
+# アプリケーション最適化設定
+application:
+  spring_boot:
+    jvm_options:
+      - "-Xms512m"
+      - "-Xmx1024m"
+      - "-XX:+UseG1GC"
+      - "-XX:MaxGCPauseMillis=200"
+      - "-XX:+UseStringDeduplication"
+      - "-XX:+OptimizeStringConcat"
+    connection_pool:
+      hikari:
+        maximum_pool_size: 20
+        minimum_idle: 5
+        connection_timeout: 30000
+        idle_timeout: 600000
+        max_lifetime: 1800000
+  react:
+    build_optimization: true
+    code_splitting: true
+    lazy_loading: true
+    bundle_analysis: true
+    compression:
+      enabled: true
+      algorithm: "gzip"
+      level: 6
+
+# 監視設定
+monitoring:
+  enabled: true
+  metrics:
+    collection_interval: 60  # 1分
+    retention_days: 30
+    prometheus:
+      enabled: true
+      port: 9090
+      scrape_interval: "15s"
+    grafana:
+      enabled: true
+      port: 3001
+      dashboards:
+        - "performance_overview"
+        - "cache_metrics"
+        - "database_metrics"
+        - "nginx_metrics"
+  alerts:
+    cpu_threshold: 80
+    memory_threshold: 85
+    disk_threshold: 90
+    response_time_threshold: 1000  # 1秒
+    error_rate_threshold: 5        # 5%
+
+# ログ設定
+logging:
+  level: "INFO"
+  rotation:
+    max_size: "100MB"
+    max_files: 10
+    compress: true
+  performance_logs:
+    enabled: true
+    path: "/var/log/tea-farm-ops/performance"
+    retention_days: 90
+
+# バックアップ設定
+backup:
+  performance_data:
+    enabled: true
+    schedule: "daily"
+    retention_days: 30
+    include:
+      - "cache_dumps"
+      - "database_statistics"
+      - "performance_metrics"
+      - "optimization_reports"
+
+# テスト設定
+testing:
+  performance_tests:
+    enabled: true
+    schedule: "weekly"
+    load_test:
+      enabled: true
+      concurrent_users: 100
+      duration: 300  # 5分
+      ramp_up_time: 60  # 1分
+    stress_test:
+      enabled: true
+      max_users: 500
+      duration: 600  # 10分
+  benchmarks:
+    enabled: true
+    schedule: "monthly"
+    metrics:
+      - "response_time"
+      - "throughput"
+      - "memory_usage"
+      - "cpu_usage"
+      - "cache_hit_rate"
+      - "database_connections"
+
+# 最適化スケジュール
+schedule:
+  daily:
+    - time: "02:00"
+      task: "database_vacuum"
+      description: "データベースVACUUM実行"
+    - time: "03:00"
+      task: "cache_cleanup"
+      description: "キャッシュクリーンアップ"
+    - time: "04:00"
+      task: "performance_monitoring"
+      description: "パフォーマンス監視"
+  weekly:
+    - day: "sunday"
+      time: "01:00"
+      task: "index_optimization"
+      description: "インデックス最適化"
+    - day: "sunday"
+      time: "02:00"
+      task: "performance_test"
+      description: "パフォーマンステスト"
+  monthly:
+    - day: "1"
+      time: "00:00"
+      task: "comprehensive_optimization"
+      description: "包括的最適化"
+
+# 通知設定
+notifications:
+  email:
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    username: "your-email@gmail.com"
+    password: "${EMAIL_PASSWORD}"
+    recipients:
+      - "admin@your-domain.com"
+      - "dev@your-domain.com"
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#tea-farm-ops"
+    username: "TeaFarmOps Bot"
+  alerts:
+    critical:
+      - "cpu_usage > 90%"
+      - "memory_usage > 95%"
+      - "disk_usage > 95%"
+      - "response_time > 5s"
+    warning:
+      - "cpu_usage > 80%"
+      - "memory_usage > 85%"
+      - "disk_usage > 85%"
+      - "response_time > 2s"
+
+# セキュリティ設定
+security:
+  access_control:
+    allowed_ips:
+      - "127.0.0.1"
+      - "::1"
+    api_rate_limit: true
+    monitoring_access: true
+  encryption:
+    ssl_enabled: true
+    tls_version: "1.2"
+    cipher_suite: "strong"
+
+# 環境別設定
+environments:
+  development:
+    performance:
+      auto_optimize: false
+      monitoring_interval: 600
+    cache:
+      max_memory: "128mb"
+    database:
+      connection_pool:
+        max_connections: 10
+    webserver:
+      gzip:
+        enabled: false
+      ssl:
+        enabled: false
+  
+  staging:
+    performance:
+      auto_optimize: true
+      monitoring_interval: 300
+    cache:
+      max_memory: "256mb"
+    database:
+      connection_pool:
+        max_connections: 15
+  
+  production:
+    performance:
+      auto_optimize: true
+      monitoring_interval: 60
+    cache:
+      max_memory: "512mb"
+      sentinel:
+        enabled: true
+    database:
+      connection_pool:
+        max_connections: 50
+    webserver:
+      worker_connections: 2048
+      keepalive_requests: 200
+
+# メンテナンス設定
+maintenance:
+  enabled: true
+  window:
+    start_time: "02:00"
+    duration: 120  # 2時間
+  tasks:
+    - "database_maintenance"
+    - "cache_maintenance"
+    - "log_rotation"
+    - "backup_cleanup"
+  notifications:
+    before_maintenance: true
+    after_maintenance: true
+    on_failure: true
+
+# レポート設定
+reports:
+  daily:
+    enabled: true
+    include:
+      - "performance_summary"
+      - "error_summary"
+      - "optimization_results"
+  weekly:
+    enabled: true
+    include:
+      - "trend_analysis"
+      - "capacity_planning"
+      - "optimization_recommendations"
+  monthly:
+    enabled: true
+    include:
+      - "comprehensive_analysis"
+      - "performance_benchmarks"
+      - "cost_optimization"
+      - "future_planning" 

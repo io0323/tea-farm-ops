@@ -1,0 +1,35 @@
+# TeaFarmOps バックアップ自動実行スケジュール
+# 使用方法: crontab config/crontab
+
+# 環境変数の設定
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=admin@your-domain.com
+
+# バックアップディレクトリの設定
+BACKUP_DIR=/backups
+LOG_DIR=/var/log/tea-farm-ops/backup
+
+# 日次バックアップ（毎日02:00）
+0 2 * * * /usr/bin/bash /app/scripts/backup-scheduler.sh --daily >> $LOG_DIR/cron_daily.log 2>&1
+
+# 週次バックアップ（毎週日曜日03:00）
+0 3 * * 0 /usr/bin/bash /app/scripts/backup-scheduler.sh --weekly >> $LOG_DIR/cron_weekly.log 2>&1
+
+# 月次バックアップ（毎月1日04:00）
+0 4 1 * * /usr/bin/bash /app/scripts/backup-scheduler.sh --monthly >> $LOG_DIR/cron_monthly.log 2>&1
+
+# バックアップ検証（毎日06:00）
+0 6 * * * /usr/bin/bash /app/scripts/backup-verify.sh >> $LOG_DIR/cron_verify.log 2>&1
+
+# 古いバックアップのクリーンアップ（毎週月曜日05:00）
+0 5 * * 1 /usr/bin/bash /app/scripts/backup-cleanup.sh >> $LOG_DIR/cron_cleanup.log 2>&1
+
+# バックアップ統計レポート（毎週月曜日07:00）
+0 7 * * 1 /usr/bin/bash /app/scripts/backup-report.sh >> $LOG_DIR/cron_report.log 2>&1
+
+# ディスク容量チェック（毎時間）
+0 * * * * /usr/bin/bash /app/scripts/backup-disk-check.sh >> $LOG_DIR/cron_disk_check.log 2>&1
+
+# バックアップテスト（毎週土曜日01:00）
+0 1 * * 6 /usr/bin/bash /app/scripts/backup-scheduler.sh --test --daily >> $LOG_DIR/cron_test.log 2>&1 

@@ -2,7 +2,7 @@ package com.teafarmops.services;
 
 import com.teafarmops.entities.Field;
 import com.teafarmops.entities.Task;
-import com.teafarmops.entities.Task.TaskStatus;
+import com.teafarmops.entities.TaskStatus;
 import com.teafarmops.repositories.FieldRepository;
 import com.teafarmops.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;

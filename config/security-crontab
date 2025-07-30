@@ -1,0 +1,83 @@
+# TeaFarmOps セキュリティ自動実行スケジュール
+# 使用方法: crontab config/security-crontab
+
+# 環境変数の設定
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=security@your-domain.com
+
+# セキュリティディレクトリの設定
+SECURITY_DIR=/app/scripts
+LOG_DIR=/var/log/tea-farm-ops/security
+
+# ファイアウォール監視（毎時間）
+0 * * * * /usr/bin/bash $SECURITY_DIR/security-firewall.sh --status >> $LOG_DIR/cron_firewall.log 2>&1
+
+# SSL証明書監視（毎日06:00）
+0 6 * * * /usr/bin/bash $SECURITY_DIR/security-ssl.sh --status >> $LOG_DIR/cron_ssl.log 2>&1
+
+# SSL証明書自動更新（毎週日曜日02:00）
+0 2 * * 0 /usr/bin/bash $SECURITY_DIR/security-ssl.sh --renew >> $LOG_DIR/cron_ssl_renew.log 2>&1
+
+# セキュリティ監査（毎日03:00）
+0 3 * * * /usr/bin/bash $SECURITY_DIR/security-audit.sh --full >> $LOG_DIR/cron_audit.log 2>&1
+
+# アクセス制御監査（毎日04:00）
+0 4 * * * /usr/bin/bash $SECURITY_DIR/security-access.sh --audit >> $LOG_DIR/cron_access.log 2>&1
+
+# ファイル権限監査（毎週月曜日05:00）
+0 5 * * 1 /usr/bin/bash $SECURITY_DIR/security-access.sh --files >> $LOG_DIR/cron_permissions.log 2>&1
+
+# ユーザー権限監査（毎週火曜日05:00）
+0 5 * * 2 /usr/bin/bash $SECURITY_DIR/security-access.sh --users >> $LOG_DIR/cron_users.log 2>&1
+
+# セキュリティ設定のバックアップ（毎週水曜日06:00）
+0 6 * * 3 /usr/bin/bash $SECURITY_DIR/security-access.sh --backup >> $LOG_DIR/cron_backup.log 2>&1
+
+# パッケージ更新チェック（毎日07:00）
+0 7 * * * /usr/bin/bash $SECURITY_DIR/security-audit.sh --packages >> $LOG_DIR/cron_packages.log 2>&1
+
+# ログ監査（毎日08:00）
+0 8 * * * /usr/bin/bash $SECURITY_DIR/security-audit.sh --logs >> $LOG_DIR/cron_logs.log 2>&1
+
+# ネットワーク監査（毎週木曜日06:00）
+0 6 * * 4 /usr/bin/bash $SECURITY_DIR/security-audit.sh --network >> $LOG_DIR/cron_network.log 2>&1
+
+# システム監査（毎週金曜日06:00）
+0 6 * * 5 /usr/bin/bash $SECURITY_DIR/security-audit.sh --system >> $LOG_DIR/cron_system.log 2>&1
+
+# セキュリティレポート生成（毎週土曜日07:00）
+0 7 * * 6 /usr/bin/bash $SECURITY_DIR/security-audit.sh --report >> $LOG_DIR/cron_report.log 2>&1
+
+# セキュリティテスト（毎週土曜日02:00）
+0 2 * * 6 /usr/bin/bash $SECURITY_DIR/security-ssl.sh --test >> $LOG_DIR/cron_ssl_test.log 2>&1
+
+# ファイアウォールテスト（毎週土曜日03:00）
+0 3 * * 6 /usr/bin/bash $SECURITY_DIR/security-firewall.sh --test >> $LOG_DIR/cron_firewall_test.log 2>&1
+
+# ログローテーション（毎日01:00）
+0 1 * * * /usr/sbin/logrotate /etc/logrotate.d/tea-farm-ops-security >> $LOG_DIR/cron_logrotate.log 2>&1
+
+# 古いセキュリティログのクリーンアップ（毎月1日02:00）
+0 2 1 * * find $LOG_DIR -name "*.log" -mtime +90 -delete >> $LOG_DIR/cron_cleanup.log 2>&1
+
+# セキュリティ設定の整合性チェック（毎日09:00）
+0 9 * * * /usr/bin/bash $SECURITY_DIR/security-access.sh --permissions >> $LOG_DIR/cron_integrity.log 2>&1
+
+# 侵入検知システムの状態確認（毎30分）
+*/30 * * * * /usr/bin/systemctl is-active --quiet fail2ban || echo "Fail2ban is not running" >> $LOG_DIR/cron_fail2ban.log 2>&1
+
+# セキュリティサービスの状態確認（毎時間）
+0 * * * * /usr/bin/bash -c 'for service in sshd ufw nginx; do systemctl is-active --quiet $service || echo "$service is not running"; done' >> $LOG_DIR/cron_services.log 2>&1
+
+# ディスク容量チェック（セキュリティログ用）（毎時間）
+0 * * * * /usr/bin/bash -c 'df -h /var/log/tea-farm-ops/security | awk "NR==2 {if (\$5 > 80) print \"Warning: Security logs disk usage is \" \$5}"' >> $LOG_DIR/cron_disk.log 2>&1
+
+# セキュリティアラートの確認（毎15分）
+*/15 * * * * /usr/bin/bash -c 'grep -i "error\|warning\|failed\|denied" $LOG_DIR/*.log | tail -5' >> $LOG_DIR/cron_alerts.log 2>&1
+
+# 月次セキュリティレポート（毎月1日08:00）
+0 8 1 * * /usr/bin/bash $SECURITY_DIR/security-audit.sh --full --report >> $LOG_DIR/cron_monthly_report.log 2>&1
+
+# セキュリティ設定の自動更新（毎週日曜日01:00）
+0 1 * * 0 /usr/bin/bash $SECURITY_DIR/security-firewall.sh --configure >> $LOG_DIR/cron_firewall_update.log 2>&1 

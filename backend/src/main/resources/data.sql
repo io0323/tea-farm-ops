@@ -7,19 +7,19 @@ INSERT INTO fields (name, location, area_size, soil_type, notes) VALUES
 
 -- タスクの初期データ
 INSERT INTO tasks (task_type, field_id, assigned_worker, start_date, end_date, status, notes) VALUES
-('剪定', 1, '田中太郎', '2024-01-15', '2024-01-20', 'COMPLETED', '春の剪定作業完了'),
-('施肥', 2, '佐藤花子', '2024-01-25', '2024-01-26', 'COMPLETED', '有機肥料を施用'),
-('収穫', 1, '田中太郎', '2024-02-01', '2024-02-05', 'IN_PROGRESS', '新茶の収穫中'),
-('除草', 3, '山田次郎', '2024-02-10', '2024-02-12', 'PENDING', '機械除草を予定'),
-('防除', 4, '佐藤花子', '2024-02-15', '2024-02-16', 'PENDING', '病害虫防除');
+('PRUNING', 1, '田中太郎', '2024-01-15', '2024-01-20', 'COMPLETED', '春の剪定作業完了'),
+('FERTILIZING', 2, '佐藤花子', '2024-01-25', '2024-01-26', 'COMPLETED', '有機肥料を施用'),
+('HARVESTING', 1, '田中太郎', '2024-02-01', '2024-02-05', 'IN_PROGRESS', '新茶の収穫中'),
+('OTHER', 3, '山田次郎', '2024-02-10', '2024-02-12', 'PENDING', '機械除草を予定'),
+('PEST_CONTROL', 4, '佐藤花子', '2024-02-15', '2024-02-16', 'PENDING', '病害虫防除');
 
 -- 収穫記録の初期データ
 INSERT INTO harvest_records (field_id, harvest_date, quantity_kg, tea_grade, notes) VALUES
-(1, '2024-01-20', 45.5, '特上', '新茶の初摘み、品質良好'),
-(2, '2024-01-25', 38.2, '上', '二番茶、香り豊か'),
-(3, '2024-02-01', 52.1, '特上', '新茶、甘みが強い'),
-(1, '2024-02-05', 41.8, '上', '二番茶、渋み適度'),
-(4, '2024-02-10', 35.6, '中', '三番茶、香り控えめ');
+(1, '2024-01-20', 45.5, 'PREMIUM', '新茶の初摘み、品質良好'),
+(2, '2024-01-25', 38.2, 'HIGH', '二番茶、香り豊か'),
+(3, '2024-02-01', 52.1, 'PREMIUM', '新茶、甘みが強い'),
+(1, '2024-02-05', 41.8, 'HIGH', '二番茶、渋み適度'),
+(4, '2024-02-10', 35.6, 'MEDIUM', '三番茶、香り控えめ');
 
 -- 天候観測の初期データ
 INSERT INTO weather_observations (date, field_id, temperature, rainfall, humidity, pests_seen, notes) VALUES

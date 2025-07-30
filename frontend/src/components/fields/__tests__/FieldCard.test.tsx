@@ -46,8 +46,8 @@ describe('FieldCard', () => {
       />
     );
 
-    const editButton = screen.getByLabelText('編集');
-    fireEvent.click(editButton);
+    const editButton = screen.getByTestId('EditIcon').closest('button');
+    fireEvent.click(editButton!);
 
     expect(mockOnEdit).toHaveBeenCalledWith(mockField);
     expect(mockOnEdit).toHaveBeenCalledTimes(1);
@@ -62,8 +62,8 @@ describe('FieldCard', () => {
       />
     );
 
-    const deleteButton = screen.getByLabelText('削除');
-    fireEvent.click(deleteButton);
+    const deleteButton = screen.getByTestId('DeleteIcon').closest('button');
+    fireEvent.click(deleteButton!);
 
     expect(mockOnDelete).toHaveBeenCalledWith(mockField);
     expect(mockOnDelete).toHaveBeenCalledTimes(1);

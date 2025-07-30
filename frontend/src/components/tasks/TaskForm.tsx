@@ -6,16 +6,17 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Alert,
+  Box,
 } from '@mui/material';
 import { Task, TaskType, TaskStatus } from '../../types';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { createTask, updateTask, clearError } from '../../store/slices/taskSlice';
+import { fetchFields } from '../../store/slices/fieldSlice';
 
 interface TaskFormProps {
   open: boolean;
@@ -26,8 +27,10 @@ interface TaskFormProps {
 const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.tasks);
+  const { fields } = useAppSelector((state) => state.fields);
 
   const [formData, setFormData] = useState({
+    fieldId: '',
     taskType: '',
     assignedWorker: '',
     startDate: '',
@@ -39,8 +42,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
   const isEdit = !!task;
 
   useEffect(() => {
+    // フィールド一覧を取得
+    dispatch(fetchFields({}));
+  }, [dispatch]);
+
+  useEffect(() => {
     if (task) {
       setFormData({
+        fieldId: task.fieldId.toString(),
         taskType: task.taskType,
         assignedWorker: task.assignedWorker,
         startDate: task.startDate,
@@ -50,6 +59,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
       });
     } else {
       setFormData({
+        fieldId: '',
         taskType: '',
         assignedWorker: '',
         startDate: '',
@@ -66,18 +76,25 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
     }
   }, [open, dispatch]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name as string]: value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const selectedField = fields.find(f => f.id.toString() === formData.fieldId);
+    if (!selectedField) {
+      return;
+    }
+
     const taskData = {
+      fieldId: parseInt(formData.fieldId),
+      fieldName: selectedField.name,
       taskType: formData.taskType as TaskType,
       assignedWorker: formData.assignedWorker,
       startDate: formData.startDate,
@@ -111,98 +128,107 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
             </Alert>
           )}
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>タスクタイプ</InputLabel>
-                <Select
-                  name="taskType"
-                  value={formData.taskType}
-                  onChange={handleChange}
-                  label="タスクタイプ"
-                  required
-                >
-                  {Object.values(TaskType).map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="担当者"
-                name="assignedWorker"
-                value={formData.assignedWorker}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>フィールド</InputLabel>
+              <Select
+                name="fieldId"
+                value={formData.fieldId}
                 onChange={handleChange}
+                label="フィールド"
                 required
-                margin="normal"
-              />
-            </Grid>
+              >
+                <MenuItem value="">
+                  <em>選択してください</em>
+                </MenuItem>
+                {fields.map((field) => (
+                  <MenuItem key={field.id} value={field.id.toString()}>
+                    {field.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="開始日"
-                name="startDate"
-                type="date"
-                value={formData.startDate}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>タスクタイプ</InputLabel>
+              <Select
+                name="taskType"
+                value={formData.taskType}
                 onChange={handleChange}
+                label="タスクタイプ"
                 required
-                margin="normal"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
+              >
+                {Object.values(TaskType).map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="終了日"
-                name="endDate"
-                type="date"
-                value={formData.endDate}
+            <TextField
+              fullWidth
+              label="担当者"
+              name="assignedWorker"
+              value={formData.assignedWorker}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+
+            <TextField
+              fullWidth
+              label="開始日"
+              name="startDate"
+              type="date"
+              value={formData.startDate}
+              onChange={handleChange}
+              required
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <TextField
+              fullWidth
+              label="終了日"
+              name="endDate"
+              type="date"
+              value={formData.endDate}
+              onChange={handleChange}
+              required
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel>ステータス</InputLabel>
+              <Select
+                name="status"
+                value={formData.status}
                 onChange={handleChange}
+                label="ステータス"
                 required
-                margin="normal"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
+              >
+                {Object.values(TaskStatus).map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>ステータス</InputLabel>
-                <Select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  label="ステータス"
-                  required
-                >
-                  {Object.values(TaskStatus).map((status) => (
-                    <MenuItem key={status} value={status}>
-                      {status}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="備考"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                multiline
-                rows={3}
-                margin="normal"
-              />
-            </Grid>
-          </Grid>
+            <TextField
+              fullWidth
+              label="備考"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              multiline
+              rows={3}
+              margin="normal"
+              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+            />
+          </Box>
         </DialogContent>
 
         <DialogActions>

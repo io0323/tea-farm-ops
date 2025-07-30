@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   Chip,
   CircularProgress,
   IconButton,
@@ -38,10 +37,9 @@ const FieldsPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(12);
 
   useEffect(() => {
-    dispatch(fetchFields());
+    dispatch(fetchFields({}));
   }, [dispatch]);
 
-  // フィルタリングされたフィールド
   const filteredFields = useMemo(() => {
     return fields.filter(field => {
       if (searchFilters.name && !field.name.toLowerCase().includes(searchFilters.name.toLowerCase())) {
@@ -57,7 +55,6 @@ const FieldsPage: React.FC = () => {
     });
   }, [fields, searchFilters]);
 
-  // ページネーションされたフィールド
   const paginatedFields = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
@@ -93,7 +90,7 @@ const FieldsPage: React.FC = () => {
 
   const handleSearch = (filters: FieldFilters) => {
     setSearchFilters(filters);
-    setCurrentPage(1); // 検索時は最初のページに戻る
+    setCurrentPage(1);
   };
 
   const handleClearSearch = () => {
@@ -111,146 +108,242 @@ const FieldsPage: React.FC = () => {
   };
 
   const handleExport = () => {
-    exportFieldsToCSV(fields);
+    exportFieldsToCSV(filteredFields);
   };
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="400px"
+        sx={{ 
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+          minHeight: '100vh'
+        }}
+      >
+        <CircularProgress sx={{ color: '#4ade80' }} />
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          フィールド管理
-        </Typography>
-        <Box display="flex" gap={1}>
-          <Button
-            variant="outlined"
-            startIcon={<ExportIcon />}
-            onClick={handleExport}
-            disabled={fields.length === 0}
+    <Box sx={{ p: 3, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', minHeight: '100vh' }}>
+      <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
+          <Typography 
+            variant="h3" 
+            component="h1"
+            sx={{ 
+              fontWeight: 700, 
+              color: '#4ade80',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            }}
           >
-            エクスポート
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            size="large"
-            onClick={handleCreate}
-          >
-            新規フィールド
-          </Button>
-        </Box>
-      </Box>
-
-      {/* 検索フィルター */}
-      <FieldSearch onSearch={handleSearch} onClear={handleClearSearch} />
-
-      {/* 検索結果表示 */}
-      {Object.keys(searchFilters).length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            検索結果: {filteredFields.length}件
+            🏞️ フィールド管理
           </Typography>
+          <Box display="flex" gap={2}>
+            <Button
+              variant="outlined"
+              startIcon={<ExportIcon />}
+              onClick={handleExport}
+              disabled={fields.length === 0}
+              sx={{
+                borderColor: '#4ade80',
+                color: '#4ade80',
+                '&:hover': {
+                  borderColor: '#22c55e',
+                  backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                },
+                '&:disabled': {
+                  borderColor: '#64748b',
+                  color: '#64748b',
+                }
+              }}
+            >
+              エクスポート
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              size="large"
+              onClick={handleCreate}
+              sx={{
+                background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                boxShadow: '0 4px 15px rgba(74, 222, 128, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  boxShadow: '0 6px 20px rgba(74, 222, 128, 0.4)',
+                }
+              }}
+            >
+              新規フィールド
+            </Button>
+          </Box>
         </Box>
-      )}
 
-      <Grid container spacing={3}>
-        {paginatedFields.map((field) => (
-          <Grid item xs={12} sm={6} md={4} key={field.id}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+        <FieldSearch onSearch={handleSearch} onClear={handleClearSearch} />
+
+        {Object.keys(searchFilters).length > 0 && (
+          <Box sx={{ mb: 3, p: 2, background: 'rgba(30, 41, 59, 0.5)', borderRadius: 2, border: '1px solid #475569' }}>
+            <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+              🔍 検索結果: {filteredFields.length}件
+            </Typography>
+          </Box>
+        )}
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+          {paginatedFields.map((field) => (
+            <Card 
+              key={field.id} 
+              sx={{ 
+                height: '100%',
+                background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                border: '1px solid #475569',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                }
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography 
+                  variant="h6" 
+                  gutterBottom
+                  sx={{ 
+                    fontWeight: 600,
+                    color: '#f1f5f9'
+                  }}
+                >
                   {field.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {field.location}
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    mb: 2,
+                    color: '#94a3b8'
+                  }}
+                >
+                  📍 {field.location}
                 </Typography>
                 
                 <Box display="flex" gap={1} sx={{ mb: 2 }}>
                   <Chip
                     label={`${field.areaSize}ha`}
                     size="small"
-                    color="primary"
+                    sx={{
+                      backgroundColor: '#4ade80',
+                      color: '#1e293b',
+                      fontWeight: 600,
+                    }}
                   />
                   {field.soilType && (
                     <Chip
                       label={field.soilType}
                       size="small"
                       variant="outlined"
+                      sx={{
+                        borderColor: '#60a5fa',
+                        color: '#60a5fa',
+                      }}
                     />
                   )}
                 </Box>
 
                 {field.notes && (
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#cbd5e1',
+                      fontStyle: 'italic'
+                    }}
+                  >
                     {field.notes}
                   </Typography>
                 )}
               </CardContent>
               
-              <CardActions sx={{ justifyContent: 'flex-end' }}>
+              <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
                 <IconButton
                   size="small"
                   onClick={() => handleEdit(field)}
-                  color="primary"
+                  sx={{
+                    color: '#60a5fa',
+                    '&:hover': {
+                      backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                    }
+                  }}
                 >
                   <EditIcon />
                 </IconButton>
                 <IconButton
                   size="small"
                   onClick={() => handleDelete(field)}
-                  color="error"
+                  sx={{
+                    color: '#f87171',
+                    '&:hover': {
+                      backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                    }
+                  }}
                 >
                   <DeleteIcon />
                 </IconButton>
               </CardActions>
             </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {filteredFields.length === 0 && (
-        <Box textAlign="center" py={4}>
-          <Typography variant="h6" color="text.secondary">
-            {Object.keys(searchFilters).length > 0 ? '検索条件に一致するフィールドがありません' : 'フィールドが登録されていません'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {Object.keys(searchFilters).length > 0 ? '検索条件を変更してください' : '新規フィールドを追加してください'}
-          </Typography>
+          ))}
         </Box>
-      )}
 
-      {/* ページネーション */}
-      {filteredFields.length > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={filteredFields.length}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
+        {filteredFields.length === 0 && (
+          <Box textAlign="center" py={6}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                color: '#94a3b8',
+                fontWeight: 500,
+                mb: 2
+              }}
+            >
+              {Object.keys(searchFilters).length > 0 ? '🔍 検索条件に一致するフィールドがありません' : '📭 フィールドが登録されていません'}
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: '#64748b',
+                fontStyle: 'italic'
+              }}
+            >
+              {Object.keys(searchFilters).length > 0 ? '検索条件を変更してお試しください' : '新規フィールドを追加してください'}
+            </Typography>
+          </Box>
+        )}
+
+        {filteredFields.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={filteredFields.length}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        )}
+
+        <FieldForm
+          open={formOpen}
+          onClose={handleFormClose}
+          field={selectedField}
         />
-      )}
 
-      {/* フォームダイアログ */}
-      <FieldForm
-        open={formOpen}
-        onClose={handleFormClose}
-        field={selectedField}
-      />
-
-      {/* 削除確認ダイアログ */}
-      <DeleteFieldDialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteDialogClose}
-        field={selectedField}
-      />
+        <DeleteFieldDialog
+          open={deleteDialogOpen}
+          onClose={handleDeleteDialogClose}
+          field={selectedField}
+        />
+      </Box>
     </Box>
   );
 };

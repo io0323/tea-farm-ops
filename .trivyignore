@@ -1,0 +1,9 @@
+# React Scripts internal dependencies - these are development dependencies
+# and the vulnerabilities are in build tools, not runtime code
+GHSA-rp65-9cf3-cjxr  # nth-check - React Scripts internal dependency
+GHSA-7fh5-64p2-3v2j  # postcss - React Scripts internal dependency
+GHSA-9jgg-88mc-972h  # webpack-dev-server - React Scripts internal dependency
+GHSA-4v9v-hfq4-rm2v  # webpack-dev-server - React Scripts internal dependency
+
+# These vulnerabilities are in development/build dependencies
+# and do not affect production runtime security

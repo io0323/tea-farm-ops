@@ -143,7 +143,7 @@ jobs:
       - name: Start frontend server
         run: |
           echo "Starting frontend server..."
-          npm run start &
+          HOST=0.0.0.0 npm run start &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
         env:
@@ -154,7 +154,10 @@ jobs:
       - name: Wait for frontend server
         run: |
           echo "Waiting for frontend server to be ready..."
-          npx wait-on http://localhost:3000 --timeout 60000
+          echo "Checking server status..."
+          ps aux | grep "npm run start" || echo "No npm start process found"
+          echo "Waiting up to 120 seconds for server to be ready..."
+          npx wait-on http://localhost:3000 --timeout 120000
           echo "Frontend server is ready!"
         env:
           NODE_ENV: test

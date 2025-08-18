@@ -30,7 +30,8 @@ const mockTasks: Task[] = [
   {
     id: 1,
     taskType: TaskType.PLANTING,
-    field: mockFields[0],
+    fieldId: mockFields[0].id,
+    fieldName: mockFields[0].name,
     assignedWorker: '田中太郎',
     startDate: '2024-01-01',
     endDate: '2024-01-31',

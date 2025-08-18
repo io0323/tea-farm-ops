@@ -53,6 +53,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           ignore-file: '.trivyignore'
+          extra-args: '--skip-version-check'
 
   # 依存関係チェック
   dependency-check:

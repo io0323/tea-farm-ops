@@ -58,19 +58,6 @@ const WeatherObservationsPage: React.FC = () => {
     setSelectedObservation(null);
   };
 
-  const getTemperatureColor = (temp: number) => {
-    if (temp >= 30) return 'error';
-    if (temp >= 25) return 'warning';
-    if (temp >= 15) return 'success';
-    return 'info';
-  };
-
-  const getRainfallColor = (rainfall: number) => {
-    if (rainfall >= 50) return 'error';
-    if (rainfall >= 20) return 'warning';
-    return 'info';
-  };
-
   if (loading) {
     return (
       <Box 

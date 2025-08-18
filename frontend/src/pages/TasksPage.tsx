@@ -58,21 +58,6 @@ const TasksPage: React.FC = () => {
     setSelectedTask(null);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'warning';
-      case 'IN_PROGRESS':
-        return 'info';
-      case 'COMPLETED':
-        return 'success';
-      case 'CANCELLED':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
   if (loading) {
     return (
       <Box 

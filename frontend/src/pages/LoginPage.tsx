@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -15,12 +15,19 @@ import { login } from '../store/slices/authSlice';
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
+
+  // ログイン成功時にダッシュボードにリダイレクト
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

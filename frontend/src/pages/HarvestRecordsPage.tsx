@@ -58,21 +58,6 @@ const HarvestRecordsPage: React.FC = () => {
     setSelectedRecord(null);
   };
 
-  const getGradeColor = (grade: string) => {
-    switch (grade) {
-      case 'PREMIUM':
-        return 'success';
-      case 'HIGH':
-        return 'primary';
-      case 'MEDIUM':
-        return 'warning';
-      case 'LOW':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
   if (loading) {
     return (
       <Box 

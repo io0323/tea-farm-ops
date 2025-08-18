@@ -4,7 +4,6 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
-import React from 'react';
 
 // テストライブラリの設定
 configure({ testIdAttribute: 'data-testid' });

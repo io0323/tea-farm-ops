@@ -54,7 +54,7 @@ export const useDataFetching = ({
     if (autoFetch) {
       fetchData();
     }
-  }, [autoFetch, fetchData, ...dependencies]);
+  }, [autoFetch, fetchData, dependencies]);
 
   useEffect(() => {
     return () => {

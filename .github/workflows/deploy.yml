@@ -172,8 +172,6 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          ignore-file: '.trivyignore'
-          extra-args: '--skip-version-check'
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v2

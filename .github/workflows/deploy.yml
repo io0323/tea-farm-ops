@@ -140,6 +140,33 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
 
+      - name: Start frontend server
+        run: |
+          echo "Starting frontend server..."
+          npm run start &
+          FRONTEND_PID=$!
+          echo "Frontend server started with PID: $FRONTEND_PID"
+        env:
+          NODE_ENV: test
+          REACT_APP_API_URL: http://localhost:8080
+          CI: true
+
+      - name: Wait for frontend server
+        run: |
+          echo "Waiting for frontend server to be ready..."
+          npx wait-on http://localhost:3000 --timeout 60000
+          echo "Frontend server is ready!"
+        env:
+          NODE_ENV: test
+
+      - name: Verify frontend server health
+        run: |
+          echo "Verifying frontend server health..."
+          curl -f http://localhost:3000 || exit 1
+          echo "Frontend server is healthy!"
+        env:
+          NODE_ENV: test
+
       - name: Run E2E tests
         run: npm run cypress:run
         env:

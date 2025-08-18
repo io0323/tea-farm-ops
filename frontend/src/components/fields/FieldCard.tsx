@@ -48,6 +48,7 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
             size="small"
             onClick={() => onEdit(field)}
             color="primary"
+            aria-label="編集"
           >
             <EditIcon />
           </IconButton>
@@ -55,6 +56,7 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
             size="small"
             onClick={() => onDelete(field)}
             color="error"
+            aria-label="削除"
           >
             <DeleteIcon />
           </IconButton>

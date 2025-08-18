@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,10 +7,13 @@ import {
   Button,
   Typography,
   Alert,
-} from '@mui/material';
-import { WeatherObservation } from '../../types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { deleteWeatherObservation, clearError } from '../../store/slices/weatherObservationSlice';
+} from "@mui/material";
+import { WeatherObservation } from "../../types";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import {
+  deleteWeatherObservation,
+  clearError,
+} from "../../store/slices/weatherObservationSlice";
 
 interface DeleteWeatherObservationDialogProps {
   open: boolean;
@@ -18,9 +21,13 @@ interface DeleteWeatherObservationDialogProps {
   observation: WeatherObservation | null;
 }
 
-const DeleteWeatherObservationDialog: React.FC<DeleteWeatherObservationDialogProps> = ({ open, onClose, observation }) => {
+const DeleteWeatherObservationDialog: React.FC<
+  DeleteWeatherObservationDialogProps
+> = ({ open, onClose, observation }) => {
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.weatherObservations);
+  const { loading, error } = useAppSelector(
+    (state) => state.weatherObservations,
+  );
 
   React.useEffect(() => {
     if (!open) {
@@ -41,10 +48,8 @@ const DeleteWeatherObservationDialog: React.FC<DeleteWeatherObservationDialogPro
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        天候観測削除確認
-      </DialogTitle>
-      
+      <DialogTitle>天候観測削除確認</DialogTitle>
+
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -59,10 +64,12 @@ const DeleteWeatherObservationDialog: React.FC<DeleteWeatherObservationDialogPro
         <Typography variant="h6" sx={{ mb: 1 }}>
           {observation.date}
         </Typography>
-        
+
         <Typography variant="body2" color="text.secondary">
-          気温: {observation.temperature}°C<br />
-          降水量: {observation.rainfall}mm<br />
+          気温: {observation.temperature}°C
+          <br />
+          降水量: {observation.rainfall}mm
+          <br />
           湿度: {observation.humidity}%
           {observation.pestsSeen && (
             <>
@@ -87,11 +94,11 @@ const DeleteWeatherObservationDialog: React.FC<DeleteWeatherObservationDialogPro
           variant="contained"
           disabled={loading}
         >
-          {loading ? '削除中...' : '削除'}
+          {loading ? "削除中..." : "削除"}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default DeleteWeatherObservationDialog; 
+export default DeleteWeatherObservationDialog;

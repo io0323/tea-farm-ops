@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,11 +12,15 @@ import {
   MenuItem,
   Alert,
   Box,
-} from '@mui/material';
-import { Task, TaskType, TaskStatus } from '../../types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { createTask, updateTask, clearError } from '../../store/slices/taskSlice';
-import { fetchFields } from '../../store/slices/fieldSlice';
+} from "@mui/material";
+import { Task, TaskType, TaskStatus } from "../../types";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import {
+  createTask,
+  updateTask,
+  clearError,
+} from "../../store/slices/taskSlice";
+import { fetchFields } from "../../store/slices/fieldSlice";
 
 interface TaskFormProps {
   open: boolean;
@@ -30,13 +34,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
   const { fields } = useAppSelector((state) => state.fields);
 
   const [formData, setFormData] = useState({
-    fieldId: '',
-    taskType: '',
-    assignedWorker: '',
-    startDate: '',
-    endDate: '',
-    status: '',
-    notes: '',
+    fieldId: "",
+    taskType: "",
+    assignedWorker: "",
+    startDate: "",
+    endDate: "",
+    status: "",
+    notes: "",
   });
 
   const isEdit = !!task;
@@ -55,17 +59,17 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
         startDate: task.startDate,
         endDate: task.endDate,
         status: task.status,
-        notes: task.notes || '',
+        notes: task.notes || "",
       });
     } else {
       setFormData({
-        fieldId: '',
-        taskType: '',
-        assignedWorker: '',
-        startDate: '',
-        endDate: '',
-        status: '',
-        notes: '',
+        fieldId: "",
+        taskType: "",
+        assignedWorker: "",
+        startDate: "",
+        endDate: "",
+        status: "",
+        notes: "",
       });
     }
   }, [task]);
@@ -76,9 +80,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
     }
   }, [open, dispatch]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } },
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -86,8 +94,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const selectedField = fields.find(f => f.id.toString() === formData.fieldId);
+
+    const selectedField = fields.find(
+      (f) => f.id.toString() === formData.fieldId,
+    );
     if (!selectedField) {
       return;
     }
@@ -116,10 +126,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {isEdit ? 'タスク編集' : '新規タスク作成'}
-      </DialogTitle>
-      
+      <DialogTitle>{isEdit ? "タスク編集" : "新規タスク作成"}</DialogTitle>
+
       <form onSubmit={handleSubmit}>
         <DialogContent>
           {error && (
@@ -128,7 +136,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
             </Alert>
           )}
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             <FormControl fullWidth margin="normal">
               <InputLabel>フィールド</InputLabel>
               <Select
@@ -226,21 +240,15 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
               multiline
               rows={3}
               margin="normal"
-              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+              sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}
             />
           </Box>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>
-            キャンセル
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-          >
-            {loading ? '保存中...' : (isEdit ? '更新' : '作成')}
+          <Button onClick={onClose}>キャンセル</Button>
+          <Button type="submit" variant="contained" disabled={loading}>
+            {loading ? "保存中..." : isEdit ? "更新" : "作成"}
           </Button>
         </DialogActions>
       </form>
@@ -248,4 +256,4 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task }) => {
   );
 };
 
-export default TaskForm; 
+export default TaskForm;

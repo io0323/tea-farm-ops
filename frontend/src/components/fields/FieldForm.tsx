@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,10 +12,14 @@ import {
   MenuItem,
   Alert,
   Box,
-} from '@mui/material';
-import { Field } from '../../types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { createField, updateField, clearError } from '../../store/slices/fieldSlice';
+} from "@mui/material";
+import { Field } from "../../types";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import {
+  createField,
+  updateField,
+  clearError,
+} from "../../store/slices/fieldSlice";
 
 interface FieldFormProps {
   open: boolean;
@@ -23,24 +27,18 @@ interface FieldFormProps {
   field?: Field | null;
 }
 
-const soilTypes = [
-  '砂質土',
-  '粘土質土',
-  'ローム質土',
-  '火山灰土',
-  'その他',
-];
+const soilTypes = ["砂質土", "粘土質土", "ローム質土", "火山灰土", "その他"];
 
 const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.fields);
 
   const [formData, setFormData] = useState({
-    name: '',
-    location: '',
-    areaSize: '',
-    soilType: '',
-    notes: '',
+    name: "",
+    location: "",
+    areaSize: "",
+    soilType: "",
+    notes: "",
   });
 
   const isEdit = !!field;
@@ -51,16 +49,16 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
         name: field.name,
         location: field.location,
         areaSize: field.areaSize.toString(),
-        soilType: field.soilType || '',
-        notes: field.notes || '',
+        soilType: field.soilType || "",
+        notes: field.notes || "",
       });
     } else {
       setFormData({
-        name: '',
-        location: '',
-        areaSize: '',
-        soilType: '',
-        notes: '',
+        name: "",
+        location: "",
+        areaSize: "",
+        soilType: "",
+        notes: "",
       });
     }
   }, [field]);
@@ -71,9 +69,13 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
     }
   }, [open, dispatch]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } },
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -81,7 +83,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const fieldData = {
       name: formData.name,
       location: formData.location,
@@ -104,9 +106,9 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        {isEdit ? 'フィールド編集' : '新規フィールド作成'}
+        {isEdit ? "フィールド編集" : "新規フィールド作成"}
       </DialogTitle>
-      
+
       <form onSubmit={handleSubmit}>
         <DialogContent>
           {error && (
@@ -115,7 +117,13 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
             </Alert>
           )}
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             <TextField
               fullWidth
               label="フィールド名"
@@ -125,7 +133,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
               required
               margin="normal"
             />
-            
+
             <TextField
               fullWidth
               label="場所"
@@ -176,21 +184,15 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
               multiline
               rows={3}
               margin="normal"
-              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+              sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}
             />
           </Box>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>
-            キャンセル
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-          >
-            {loading ? '保存中...' : (isEdit ? '更新' : '作成')}
+          <Button onClick={onClose}>キャンセル</Button>
+          <Button type="submit" variant="contained" disabled={loading}>
+            {loading ? "保存中..." : isEdit ? "更新" : "作成"}
           </Button>
         </DialogActions>
       </form>
@@ -198,4 +200,4 @@ const FieldForm: React.FC<FieldFormProps> = ({ open, onClose, field }) => {
   );
 };
 
-export default FieldForm; 
+export default FieldForm;

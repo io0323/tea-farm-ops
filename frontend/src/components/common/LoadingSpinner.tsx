@@ -1,11 +1,13 @@
-import React from 'react';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import React from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 interface LoadingSpinnerProps {
   message?: string;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = '読み込み中...' }) => {
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  message = "読み込み中...",
+}) => {
   return (
     <Box
       display="flex"
@@ -23,4 +25,4 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = '読み込み
   );
 };
 
-export default LoadingSpinner; 
+export default LoadingSpinner;

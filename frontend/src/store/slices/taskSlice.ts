@@ -1,46 +1,43 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Task } from '../../types';
-import { apiClient } from '../../services/api';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { Task } from "../../types";
+import { apiClient } from "../../services/api";
 
 // 非同期アクション
-export const fetchTasks = createAsyncThunk(
-  'tasks/fetchTasks',
-  async () => {
-    const response = await apiClient.getTasks();
-    return response;
-  }
-);
+export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
+  const response = await apiClient.getTasks();
+  return response;
+});
 
 export const fetchTaskById = createAsyncThunk(
-  'tasks/fetchTaskById',
+  "tasks/fetchTaskById",
   async (id: number) => {
     const response = await apiClient.getTask(id);
     return response;
-  }
+  },
 );
 
 export const createTask = createAsyncThunk(
-  'tasks/createTask',
-  async (task: Omit<Task, 'id'>) => {
+  "tasks/createTask",
+  async (task: Omit<Task, "id">) => {
     const response = await apiClient.createTask(task);
     return response;
-  }
+  },
 );
 
 export const updateTask = createAsyncThunk(
-  'tasks/updateTask',
+  "tasks/updateTask",
   async ({ id, task }: { id: number; task: Partial<Task> }) => {
     const response = await apiClient.updateTask(id, task);
     return response;
-  }
+  },
 );
 
 export const deleteTask = createAsyncThunk(
-  'tasks/deleteTask',
+  "tasks/deleteTask",
   async (id: number) => {
     await apiClient.deleteTask(id);
     return id;
-  }
+  },
 );
 
 interface TaskState {
@@ -58,7 +55,7 @@ const initialState: TaskState = {
 };
 
 const taskSlice = createSlice({
-  name: 'tasks',
+  name: "tasks",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -81,7 +78,7 @@ const taskSlice = createSlice({
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'タスクの取得に失敗しました';
+        state.error = action.error.message || "タスクの取得に失敗しました";
       })
       // fetchTaskById
       .addCase(fetchTaskById.pending, (state) => {
@@ -94,7 +91,7 @@ const taskSlice = createSlice({
       })
       .addCase(fetchTaskById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'タスクの取得に失敗しました';
+        state.error = action.error.message || "タスクの取得に失敗しました";
       })
       // createTask
       .addCase(createTask.pending, (state) => {
@@ -107,7 +104,7 @@ const taskSlice = createSlice({
       })
       .addCase(createTask.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'タスクの作成に失敗しました';
+        state.error = action.error.message || "タスクの作成に失敗しました";
       })
       // updateTask
       .addCase(updateTask.pending, (state) => {
@@ -116,7 +113,9 @@ const taskSlice = createSlice({
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.tasks.findIndex(task => task.id === action.payload.id);
+        const index = state.tasks.findIndex(
+          (task) => task.id === action.payload.id,
+        );
         if (index !== -1) {
           state.tasks[index] = action.payload;
         }
@@ -126,7 +125,7 @@ const taskSlice = createSlice({
       })
       .addCase(updateTask.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'タスクの更新に失敗しました';
+        state.error = action.error.message || "タスクの更新に失敗しました";
       })
       // deleteTask
       .addCase(deleteTask.pending, (state) => {
@@ -135,17 +134,17 @@ const taskSlice = createSlice({
       })
       .addCase(deleteTask.fulfilled, (state, action) => {
         state.loading = false;
-        state.tasks = state.tasks.filter(task => task.id !== action.payload);
+        state.tasks = state.tasks.filter((task) => task.id !== action.payload);
         if (state.currentTask?.id === action.payload) {
           state.currentTask = null;
         }
       })
       .addCase(deleteTask.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'タスクの削除に失敗しました';
+        state.error = action.error.message || "タスクの削除に失敗しました";
       });
   },
 });
 
 export const { clearError, clearCurrentTask } = taskSlice.actions;
-export default taskSlice.reducer; 
+export default taskSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,9 +10,9 @@ import {
   Button,
   Box,
   Typography,
-} from '@mui/material';
-import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material';
-import { TaskType, TaskStatus } from '../../types';
+} from "@mui/material";
+import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
+import { TaskType, TaskStatus } from "../../types";
 
 interface TaskSearchProps {
   onSearch: (filters: TaskFilters) => void;
@@ -27,13 +27,13 @@ export interface TaskFilters {
 
 const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
   const [filters, setFilters] = useState<TaskFilters>({
-    taskType: '',
-    status: '',
-    assignedWorker: '',
+    taskType: "",
+    status: "",
+    assignedWorker: "",
   });
 
   const handleChange = (field: keyof TaskFilters, value: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -41,21 +41,25 @@ const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
 
   const handleSearch = () => {
     const activeFilters = Object.fromEntries(
-      Object.entries(filters).filter(([_, value]) => value && value.trim() !== '')
+      Object.entries(filters).filter(
+        ([_, value]) => value && value.trim() !== "",
+      ),
     );
     onSearch(activeFilters);
   };
 
   const handleClear = () => {
     setFilters({
-      taskType: '',
-      status: '',
-      assignedWorker: '',
+      taskType: "",
+      status: "",
+      assignedWorker: "",
     });
     onClear();
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value && value.trim() !== '');
+  const hasActiveFilters = Object.values(filters).some(
+    (value) => value && value.trim() !== "",
+  );
 
   return (
     <Card sx={{ mb: 3 }}>
@@ -63,13 +67,20 @@ const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
         <Typography variant="h6" sx={{ mb: 2 }}>
           タスク検索
         </Typography>
-        
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' }, gap: 2, alignItems: 'center' }}>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(4, 1fr)" },
+            gap: 2,
+            alignItems: "center",
+          }}
+        >
           <FormControl fullWidth size="small">
             <InputLabel>タスクタイプ</InputLabel>
             <Select
               value={filters.taskType}
-              onChange={(e) => handleChange('taskType', e.target.value)}
+              onChange={(e) => handleChange("taskType", e.target.value)}
               label="タスクタイプ"
             >
               <MenuItem value="">
@@ -82,12 +93,12 @@ const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
               ))}
             </Select>
           </FormControl>
-          
+
           <FormControl fullWidth size="small">
             <InputLabel>ステータス</InputLabel>
             <Select
               value={filters.status}
-              onChange={(e) => handleChange('status', e.target.value)}
+              onChange={(e) => handleChange("status", e.target.value)}
               label="ステータス"
             >
               <MenuItem value="">
@@ -100,15 +111,15 @@ const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
               ))}
             </Select>
           </FormControl>
-          
+
           <TextField
             fullWidth
             label="担当者"
             value={filters.assignedWorker}
-            onChange={(e) => handleChange('assignedWorker', e.target.value)}
+            onChange={(e) => handleChange("assignedWorker", e.target.value)}
             size="small"
           />
-          
+
           <Box display="flex" gap={1}>
             <Button
               variant="contained"
@@ -135,4 +146,4 @@ const TaskSearch: React.FC<TaskSearchProps> = ({ onSearch, onClear }) => {
   );
 };
 
-export default TaskSearch; 
+export default TaskSearch;

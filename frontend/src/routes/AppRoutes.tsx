@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { getCurrentUser } from '../store/slices/authSlice';
-import Layout from '../components/Layout/Layout';
-import LoginPage from '../pages/LoginPage';
-import DashboardPage from '../pages/DashboardPage';
-import FieldsPage from '../pages/FieldsPage';
-import TasksPage from '../pages/TasksPage';
-import HarvestRecordsPage from '../pages/HarvestRecordsPage';
-import WeatherObservationsPage from '../pages/WeatherObservationsPage';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { getCurrentUser } from "../store/slices/authSlice";
+import Layout from "../components/Layout/Layout";
+import LoginPage from "../pages/LoginPage";
+import DashboardPage from "../pages/DashboardPage";
+import FieldsPage from "../pages/FieldsPage";
+import TasksPage from "../pages/TasksPage";
+import HarvestRecordsPage from "../pages/HarvestRecordsPage";
+import WeatherObservationsPage from "../pages/WeatherObservationsPage";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const AppRoutes: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -17,7 +17,7 @@ const AppRoutes: React.FC = () => {
 
   useEffect(() => {
     // トークンが存在する場合、ユーザー情報を取得
-    if (localStorage.getItem('authToken')) {
+    if (localStorage.getItem("authToken")) {
       dispatch(getCurrentUser());
     }
   }, [dispatch]);
@@ -45,11 +45,14 @@ const AppRoutes: React.FC = () => {
         <Route path="/fields" element={<FieldsPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/harvest-records" element={<HarvestRecordsPage />} />
-        <Route path="/weather-observations" element={<WeatherObservationsPage />} />
+        <Route
+          path="/weather-observations"
+          element={<WeatherObservationsPage />}
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   );
 };
 
-export default AppRoutes; 
+export default AppRoutes;

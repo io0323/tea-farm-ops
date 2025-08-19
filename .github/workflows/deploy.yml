@@ -253,21 +253,26 @@ jobs:
           echo "Listing package.json scripts:"
           cat package.json | grep -A 10 '"scripts"'
           
-          # Start the frontend server with proper environment
-          HOST=0.0.0.0 npm run start &
+          # Start the frontend server with proper environment and logging
+          echo "Starting npm start with full logging..."
+          HOST=0.0.0.0 npm run start > npm-start.log 2>&1 &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
           
           # Wait a moment for the server to start
-          sleep 5
+          sleep 10
           
           # Check if the process is running
           if ps -p $FRONTEND_PID > /dev/null; then
             echo "Frontend server process is running (PID: $FRONTEND_PID)"
+            echo "Checking npm start logs:"
+            tail -20 npm-start.log || echo "No logs available yet"
           else
             echo "ERROR: Frontend server process failed to start"
             echo "Checking for any error logs..."
             ps aux | grep "npm\|node" | grep -v grep || echo "No npm/node processes found"
+            echo "npm start logs:"
+            cat npm-start.log || echo "No logs available"
             exit 1
           fi
         env:
@@ -300,6 +305,29 @@ jobs:
           ps aux | grep "npm\|node" | grep -v grep || echo "No npm/node processes found"
           
           echo "Waiting up to 120 seconds for server to be ready..."
+          
+          # Check npm start logs for any errors
+          echo "Checking npm start logs for errors..."
+          if [ -f "frontend/npm-start.log" ]; then
+            echo "npm start logs (last 30 lines):"
+            tail -30 frontend/npm-start.log
+          else
+            echo "No npm-start.log found"
+          fi
+          
+          # Try to connect to the server before wait-on
+          echo "Testing server connectivity..."
+          for i in {1..5}; do
+            echo "Attempt $i: Testing http://localhost:3000..."
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is responding on port 3000!"
+              break
+            else
+              echo "Server not responding yet, waiting 5 seconds..."
+              sleep 5
+            fi
+          done
+          
           npx wait-on http://localhost:3000 --timeout 120000
           echo "Frontend server is ready!"
           

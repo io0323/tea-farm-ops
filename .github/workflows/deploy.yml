@@ -159,6 +159,10 @@ jobs:
           echo "Checking for any root user database connections..."
           ps aux | grep -i "root.*postgres" || echo "No root user postgres connections found"
           
+          # Check environment variables for any root references
+          echo "Checking environment variables for root references..."
+          env | grep -i root || echo "No root references in environment variables"
+          
           echo "PostgreSQL connection test completed"
         env:
           NODE_ENV: test
@@ -189,6 +193,10 @@ jobs:
           # Verify no root user references in environment
           echo "Verifying no root user references..."
           env | grep -i root || echo "No root user references found in environment"
+          
+          # Check for any hardcoded database configurations
+          echo "Checking for hardcoded database configurations..."
+          find . -name "*.js" -o -name "*.ts" -o -name "*.json" | xargs grep -l "root.*postgres\|postgres.*root" 2>/dev/null || echo "No hardcoded root user database configs found"
           
           echo "Starting frontend server with proper environment..."
           HOST=0.0.0.0 npm run start &

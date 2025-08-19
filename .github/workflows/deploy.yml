@@ -135,6 +135,10 @@ jobs:
         working-directory: ./
         run: |
           cd backend
+          echo "Starting backend server with database configuration:"
+          echo "SPRING_DATASOURCE_URL: $SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME: $SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD: $SPRING_DATASOURCE_PASSWORD"
           mvn spring-boot:run -Dspring-boot.run.profiles=test &
           sleep 30
         env:
@@ -175,10 +179,6 @@ jobs:
           echo "Starting frontend server..."
           echo "Current working directory: $(pwd)"
           echo "Current environment variables:"
-          echo "DB_USER: $DB_USER"
-          echo "DB_PASSWORD: $DB_PASSWORD"
-          echo "DB_NAME: $DB_NAME"
-          echo "DB_HOST: $DB_HOST"
           echo "NODE_ENV: $NODE_ENV"
           echo "CI: $CI"
           
@@ -217,16 +217,11 @@ jobs:
             echo "Creating .env file manually with required settings..."
             echo "REACT_APP_ENVIRONMENT=test" > frontend/.env
             echo "REACT_APP_API_URL=http://localhost:8080" >> frontend/.env
-            echo "DB_USER=postgres" >> frontend/.env
-            echo "DB_PASSWORD=postgres" >> frontend/.env
-            echo "DB_NAME=teafarmops_test" >> frontend/.env
-            echo "DB_HOST=localhost" >> frontend/.env
-            echo "DB_PORT=5432" >> frontend/.env
             echo "NODE_ENV=test" >> frontend/.env
             echo "CI=true" >> frontend/.env
-            echo "REACT_APP_ENABLE_DEBUG_MODE=true" >> frontend/.env
-            echo "REACT_APP_ENABLE_LOGGING=true" >> frontend/.env
-            echo "REACT_APP_LOG_LEVEL=debug" >> frontend/.env
+            echo "BROWSER=none" >> frontend/.env
+            echo "PORT=3000" >> frontend/.env
+            echo "HOST=0.0.0.0" >> frontend/.env
             echo "Manual .env file created:"
             cat frontend/.env
           fi

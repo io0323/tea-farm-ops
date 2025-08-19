@@ -128,11 +128,13 @@ jobs:
           cache-dependency-path: './frontend/package-lock.json'
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm ci
 
       - name: Start backend server
+        working-directory: ./
         run: |
-          cd ../backend
+          cd backend
           mvn spring-boot:run -Dspring-boot.run.profiles=test &
           sleep 30
         env:
@@ -246,9 +248,28 @@ jobs:
           
           echo "Starting frontend server with proper environment..."
           cd frontend
+          echo "Starting npm start in frontend directory..."
+          echo "Current directory: $(pwd)"
+          echo "Listing package.json scripts:"
+          cat package.json | grep -A 10 '"scripts"'
+          
+          # Start the frontend server with proper environment
           HOST=0.0.0.0 npm run start &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
+          
+          # Wait a moment for the server to start
+          sleep 5
+          
+          # Check if the process is running
+          if ps -p $FRONTEND_PID > /dev/null; then
+            echo "Frontend server process is running (PID: $FRONTEND_PID)"
+          else
+            echo "ERROR: Frontend server process failed to start"
+            echo "Checking for any error logs..."
+            ps aux | grep "npm\|node" | grep -v grep || echo "No npm/node processes found"
+            exit 1
+          fi
         env:
           NODE_ENV: test
           REACT_APP_API_URL: http://localhost:8080
@@ -269,6 +290,14 @@ jobs:
           echo "Checking for database connection attempts..."
           sleep 10
           ps aux | grep -i "postgres\|psql\|root" | grep -v grep || echo "No database connection processes found"
+          
+          # Check if port 3000 is being listened to
+          echo "Checking if port 3000 is being listened to..."
+          netstat -tlnp 2>/dev/null | grep :3000 || echo "Port 3000 not yet listening"
+          
+          # Check for any error logs from the frontend process
+          echo "Checking for frontend process logs..."
+          ps aux | grep "npm\|node" | grep -v grep || echo "No npm/node processes found"
           
           echo "Waiting up to 120 seconds for server to be ready..."
           npx wait-on http://localhost:3000 --timeout 120000

@@ -140,14 +140,48 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
 
+      - name: Test PostgreSQL connection
+        run: |
+          echo "Testing PostgreSQL connection before starting frontend..."
+          echo "Using credentials: postgres/postgres@localhost:5432/teafarmops_test"
+          
+          # Test connection with psql if available
+          if command -v psql &> /dev/null; then
+            echo "Testing with psql..."
+            PGPASSWORD=postgres psql -h localhost -U postgres -d teafarmops_test -c "SELECT 1;" || echo "psql connection failed"
+          fi
+          
+          # Test with netcat
+          echo "Testing port connectivity..."
+          nc -z localhost 5432 && echo "Port 5432 is accessible" || echo "Port 5432 is not accessible"
+          
+          echo "PostgreSQL connection test completed"
+        env:
+          NODE_ENV: test
+
       - name: Start frontend server
         run: |
           echo "Starting frontend server..."
+          echo "Current environment variables:"
+          echo "DB_USER: $DB_USER"
+          echo "DB_PASSWORD: $DB_PASSWORD"
+          echo "DB_NAME: $DB_NAME"
+          echo "DB_HOST: $DB_HOST"
+          echo "NODE_ENV: $NODE_ENV"
+          echo "CI: $CI"
+          
           echo "Setting environment variables for database connection..."
           export DB_USER=postgres
           export DB_PASSWORD=postgres
           export DB_NAME=teafarmops_test
           export DB_HOST=localhost
+          
+          echo "Updated environment variables:"
+          echo "DB_USER: $DB_USER"
+          echo "DB_PASSWORD: $DB_PASSWORD"
+          echo "DB_NAME: $DB_NAME"
+          echo "DB_HOST: $DB_HOST"
+          
           echo "Starting frontend server with proper environment..."
           HOST=0.0.0.0 npm run start &
           FRONTEND_PID=$!

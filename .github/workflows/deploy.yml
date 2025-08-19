@@ -212,9 +212,33 @@ jobs:
           
           # Use the existing .env.test file for React Scripts
           echo "Using existing .env.test file for React Scripts..."
-          cp frontend/.env.test frontend/.env
-          echo "Frontend .env file created:"
-          cat frontend/.env
+          echo "Current directory: $(pwd)"
+          echo "Listing frontend directory contents:"
+          ls -la frontend/
+          echo "Checking if .env.test exists:"
+          if [ -f "frontend/.env.test" ]; then
+            echo ".env.test file found, copying to .env..."
+            cp frontend/.env.test frontend/.env
+            echo "Frontend .env file created:"
+            cat frontend/.env
+          else
+            echo "ERROR: .env.test file not found!"
+            echo "Creating .env file manually with required settings..."
+            echo "REACT_APP_ENVIRONMENT=test" > frontend/.env
+            echo "REACT_APP_API_URL=http://localhost:8080" >> frontend/.env
+            echo "DB_USER=postgres" >> frontend/.env
+            echo "DB_PASSWORD=postgres" >> frontend/.env
+            echo "DB_NAME=teafarmops_test" >> frontend/.env
+            echo "DB_HOST=localhost" >> frontend/.env
+            echo "DB_PORT=5432" >> frontend/.env
+            echo "NODE_ENV=test" >> frontend/.env
+            echo "CI=true" >> frontend/.env
+            echo "REACT_APP_ENABLE_DEBUG_MODE=true" >> frontend/.env
+            echo "REACT_APP_ENABLE_LOGGING=true" >> frontend/.env
+            echo "REACT_APP_LOG_LEVEL=debug" >> frontend/.env
+            echo "Manual .env file created:"
+            cat frontend/.env
+          fi
           
           echo "Starting frontend server with proper environment..."
           HOST=0.0.0.0 npm run start &

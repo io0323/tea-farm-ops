@@ -241,12 +241,42 @@ jobs:
           # Frontend should not need database environment variables
           echo "Frontend server does not require database environment variables"
           
+          # Ensure proper environment variables for React Scripts
+          export NODE_ENV=test
+          export CI=true
+          export BROWSER=none
+          export PORT=3000
+          export HOST=0.0.0.0
+          
+          echo "Environment variables set for frontend server:"
+          echo "NODE_ENV: $NODE_ENV"
+          echo "CI: $CI"
+          echo "BROWSER: $BROWSER"
+          echo "PORT: $PORT"
+          echo "HOST: $HOST"
+          
+          echo "Starting npm start with detailed logging..."
           HOST=0.0.0.0 npm run start > npm-start.log 2>&1 &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
           
+          # Monitor the startup process
+          echo "Monitoring frontend server startup..."
+          for i in {1..10}; do
+            if ps -p $FRONTEND_PID > /dev/null; then
+              echo "Frontend process is running (attempt $i)"
+              echo "Recent logs:"
+              tail -10 npm-start.log || echo "No logs yet"
+              sleep 5
+            else
+              echo "Frontend process stopped unexpectedly (attempt $i)"
+              break
+            fi
+          done
+          
           # Wait a moment for the server to start
-          sleep 30
+          echo "Waiting for frontend server to initialize..."
+          sleep 45
           
           # Check if the process is running
           if ps -p $FRONTEND_PID > /dev/null; then
@@ -284,7 +314,7 @@ jobs:
           
           # Check for any database connection attempts during startup
           echo "Checking for database connection attempts..."
-          sleep 20
+          sleep 30
           ps aux | grep -i "postgres\|psql\|root" | grep -v grep || echo "No database connection processes found"
           
           # Check if port 3000 is being listened to
@@ -306,16 +336,16 @@ jobs:
             echo "No npm-start.log found"
           fi
           
-          # Try to connect to the server before wait-on
+          # Try to connect to the server before wait-on with more attempts
           echo "Testing server connectivity..."
-          for i in {1..5}; do
+          for i in {1..8}; do
             echo "Attempt $i: Testing http://localhost:3000..."
             if curl -f http://localhost:3000 > /dev/null 2>&1; then
               echo "Server is responding on port 3000!"
               break
             else
-              echo "Server not responding yet, waiting 10 seconds..."
-              sleep 10
+              echo "Server not responding yet, waiting 15 seconds..."
+              sleep 15
             fi
           done
           

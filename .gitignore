@@ -70,4 +70,12 @@ logs/
 
 # Temporary files
 *.tmp
-*.temp 
+*.temp
+
+# SSL and security files
+ssl/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx 

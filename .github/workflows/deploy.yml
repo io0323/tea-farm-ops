@@ -182,29 +182,14 @@ jobs:
           echo "NODE_ENV: $NODE_ENV"
           echo "CI: $CI"
           
-          echo "Setting environment variables for database connection..."
-          export DB_USER=postgres
-          export DB_PASSWORD=postgres
-          export DB_NAME=teafarmops_test
-          export DB_HOST=localhost
-          
+          echo "Setting React environment variables..."
           # Set React environment variables explicitly
-          export REACT_APP_DB_USER=postgres
-          export REACT_APP_DB_PASSWORD=postgres
-          export REACT_APP_DB_NAME=teafarmops_test
-          export REACT_APP_DB_HOST=localhost
-          export REACT_APP_DB_PORT=5432
+          export REACT_APP_ENVIRONMENT=test
+          export REACT_APP_API_URL=http://localhost:8080
           
           echo "Updated environment variables:"
-          echo "DB_USER: $DB_USER"
-          echo "DB_PASSWORD: $DB_PASSWORD"
-          echo "DB_NAME: $DB_NAME"
-          echo "DB_HOST: $DB_HOST"
-          echo "REACT_APP_DB_USER: $REACT_APP_DB_USER"
-          echo "REACT_APP_DB_PASSWORD: $REACT_APP_DB_PASSWORD"
-          echo "REACT_APP_DB_NAME: $REACT_APP_DB_NAME"
-          echo "REACT_APP_DB_HOST: $REACT_APP_DB_HOST"
-          echo "REACT_APP_DB_PORT: $REACT_APP_DB_PORT"
+          echo "REACT_APP_ENVIRONMENT: $REACT_APP_ENVIRONMENT"
+          echo "REACT_APP_API_URL: $REACT_APP_API_URL"
           
           # Verify no root user references in environment
           echo "Verifying no root user references..."
@@ -287,10 +272,6 @@ jobs:
         env:
           NODE_ENV: test
           REACT_APP_API_URL: http://localhost:8080
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: teafarmops_test
-          DB_HOST: localhost
           CI: true
 
       - name: Wait for frontend server

@@ -155,6 +155,10 @@ jobs:
           echo "Testing port connectivity..."
           nc -z localhost 5432 && echo "Port 5432 is accessible" || echo "Port 5432 is not accessible"
           
+          # Check if any process is trying to connect with root user
+          echo "Checking for any root user database connections..."
+          ps aux | grep -i "root.*postgres" || echo "No root user postgres connections found"
+          
           echo "PostgreSQL connection test completed"
         env:
           NODE_ENV: test
@@ -181,6 +185,10 @@ jobs:
           echo "DB_PASSWORD: $DB_PASSWORD"
           echo "DB_NAME: $DB_NAME"
           echo "DB_HOST: $DB_HOST"
+          
+          # Verify no root user references in environment
+          echo "Verifying no root user references..."
+          env | grep -i root || echo "No root user references found in environment"
           
           echo "Starting frontend server with proper environment..."
           HOST=0.0.0.0 npm run start &

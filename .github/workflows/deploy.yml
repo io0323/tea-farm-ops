@@ -168,8 +168,10 @@ jobs:
           NODE_ENV: test
 
       - name: Start frontend server
+        working-directory: ./
         run: |
           echo "Starting frontend server..."
+          echo "Current working directory: $(pwd)"
           echo "Current environment variables:"
           echo "DB_USER: $DB_USER"
           echo "DB_PASSWORD: $DB_PASSWORD"
@@ -213,6 +215,8 @@ jobs:
           # Use the existing .env.test file for React Scripts
           echo "Using existing .env.test file for React Scripts..."
           echo "Current directory: $(pwd)"
+          echo "Listing current directory contents:"
+          ls -la
           echo "Listing frontend directory contents:"
           ls -la frontend/
           echo "Checking if .env.test exists:"
@@ -241,6 +245,7 @@ jobs:
           fi
           
           echo "Starting frontend server with proper environment..."
+          cd frontend
           HOST=0.0.0.0 npm run start &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
@@ -254,6 +259,7 @@ jobs:
           CI: true
 
       - name: Wait for frontend server
+        working-directory: ./
         run: |
           echo "Waiting for frontend server to be ready..."
           echo "Checking server status..."
@@ -275,6 +281,7 @@ jobs:
           NODE_ENV: test
 
       - name: Verify frontend server health
+        working-directory: ./
         run: |
           echo "Verifying frontend server health..."
           curl -f http://localhost:3000 || exit 1
@@ -283,6 +290,7 @@ jobs:
           NODE_ENV: test
 
       - name: Run E2E tests
+        working-directory: ./frontend
         run: npm run cypress:run
         env:
           CYPRESS_baseUrl: http://localhost:3000

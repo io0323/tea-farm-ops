@@ -26,7 +26,7 @@ const DashboardPage: React.FC = () => {
     if (process.env.NODE_ENV === "test" || process.env.CI === "true") {
       return;
     }
-    
+
     dispatch(fetchFields({}));
     dispatch(fetchTasks());
     dispatch(fetchHarvestRecords());

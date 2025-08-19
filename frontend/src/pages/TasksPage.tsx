@@ -34,7 +34,7 @@ const TasksPage: React.FC = () => {
     if (process.env.NODE_ENV === "test" || process.env.CI === "true") {
       return;
     }
-    
+
     dispatch(fetchTasks());
   }, [dispatch]);
 

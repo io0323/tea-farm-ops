@@ -17,10 +17,10 @@ const AppRoutes: React.FC = () => {
 
   useEffect(() => {
     // CI環境では認証チェックをスキップ
-    if (process.env.NODE_ENV === 'test' || process.env.CI === 'true') {
+    if (process.env.NODE_ENV === "test" || process.env.CI === "true") {
       return;
     }
-    
+
     // トークンが存在する場合、ユーザー情報を取得
     if (localStorage.getItem("authToken")) {
       dispatch(getCurrentUser());
@@ -33,7 +33,7 @@ const AppRoutes: React.FC = () => {
   }
 
   // CI環境では認証済みとして扱う
-  if (process.env.NODE_ENV === 'test' || process.env.CI === 'true') {
+  if (process.env.NODE_ENV === "test" || process.env.CI === "true") {
     // 認証済みとして扱い、メインアプリケーションを表示
   } else if (!isAuthenticated) {
     // 未認証の場合、ログインページにリダイレクト

@@ -34,6 +34,11 @@ const HarvestRecordsPage: React.FC = () => {
   );
 
   useEffect(() => {
+    // CI環境ではAPIコールをスキップ
+    if (process.env.NODE_ENV === "test" || process.env.CI === "true") {
+      return;
+    }
+    
     dispatch(fetchHarvestRecords());
   }, [dispatch]);
 

@@ -210,20 +210,11 @@ jobs:
           echo "Checking for hardcoded database configurations..."
           find . -name "*.js" -o -name "*.ts" -o -name "*.json" | xargs grep -l "root.*postgres\|postgres.*root" 2>/dev/null || echo "No hardcoded root user database configs found"
           
-          # Create a temporary .env file for React Scripts
-          echo "Creating temporary .env file for React Scripts..."
-          cat > .env.temp << EOF
-          REACT_APP_DB_USER=postgres
-          REACT_APP_DB_PASSWORD=postgres
-          REACT_APP_DB_NAME=teafarmops_test
-          REACT_APP_DB_HOST=localhost
-          REACT_APP_DB_PORT=5432
-          NODE_ENV=test
-          CI=true
-          EOF
-          
-          echo "Temporary .env file created:"
-          cat .env.temp
+          # Use the existing .env.test file for React Scripts
+          echo "Using existing .env.test file for React Scripts..."
+          cp frontend/.env.test frontend/.env
+          echo "Frontend .env file created:"
+          cat frontend/.env
           
           echo "Starting frontend server with proper environment..."
           HOST=0.0.0.0 npm run start &

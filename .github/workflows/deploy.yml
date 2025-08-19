@@ -238,19 +238,8 @@ jobs:
           # Start the frontend server with proper environment and logging
           echo "Starting npm start with full logging..."
           
-          # Export database environment variables explicitly
-          export DB_USER=postgres
-          export DB_PASSWORD=postgres
-          export DB_NAME=teafarmops_test
-          export DB_HOST=localhost
-          export DB_PORT=5432
-          
-          echo "Exported database environment variables:"
-          echo "DB_USER: $DB_USER"
-          echo "DB_PASSWORD: $DB_PASSWORD"
-          echo "DB_NAME: $DB_NAME"
-          echo "DB_HOST: $DB_HOST"
-          echo "DB_PORT: $DB_PORT"
+          # Frontend should not need database environment variables
+          echo "Frontend server does not require database environment variables"
           
           HOST=0.0.0.0 npm run start > npm-start.log 2>&1 &
           FRONTEND_PID=$!
@@ -285,11 +274,6 @@ jobs:
           NODE_ENV: test
           REACT_APP_API_URL: http://localhost:8080
           CI: true
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: teafarmops_test
-          DB_HOST: localhost
-          DB_PORT: 5432
 
       - name: Wait for frontend server
         working-directory: ./

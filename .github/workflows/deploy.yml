@@ -258,27 +258,35 @@ jobs:
           echo "Starting npm start with detailed logging..."
           # Ensure server binds to all interfaces for CI environment
           echo "Starting frontend server with explicit binding..."
-          npm run start > npm-start.log 2>&1 &
+          # Use explicit HOST and PORT to ensure proper binding
+          HOST=0.0.0.0 PORT=3000 npm run start > npm-start.log 2>&1 &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
           
           # Monitor the startup process
           echo "Monitoring frontend server startup..."
-          for i in {1..10}; do
+          for i in {1..15}; do
             if ps -p $FRONTEND_PID > /dev/null; then
               echo "Frontend process is running (attempt $i)"
               echo "Recent logs:"
               tail -10 npm-start.log || echo "No logs yet"
+              
+              # Check if process is listening on port 3000
+              echo "Checking port binding (attempt $i):"
+              netstat -tlnp 2>/dev/null | grep :3000 || echo "Port 3000 not yet listening"
+              
               sleep 5
             else
               echo "Frontend process stopped unexpectedly (attempt $i)"
+              echo "Checking for error logs:"
+              tail -20 npm-start.log || echo "No logs available"
               break
             fi
           done
           
           # Wait a moment for the server to start
           echo "Waiting for frontend server to initialize..."
-          sleep 45
+          sleep 60
           
           # Check if the process is running
           if ps -p $FRONTEND_PID > /dev/null; then
@@ -323,7 +331,7 @@ jobs:
           
           # Check for any database connection attempts during startup
           echo "Checking for database connection attempts..."
-          sleep 30
+          sleep 45
           ps aux | grep -i "postgres\|psql\|root" | grep -v grep || echo "No database connection processes found"
           
           # Check if port 3000 is being listened to
@@ -354,14 +362,14 @@ jobs:
           
           # Try to connect to the server before wait-on with more attempts
           echo "Testing server connectivity..."
-          for i in {1..8}; do
+          for i in {1..10}; do
             echo "Attempt $i: Testing http://localhost:3000..."
             if curl -f http://localhost:3000 > /dev/null 2>&1; then
               echo "Server is responding on port 3000!"
               break
             else
-              echo "Server not responding yet, waiting 15 seconds..."
-              sleep 15
+              echo "Server not responding yet, waiting 20 seconds..."
+              sleep 20
             fi
           done
           

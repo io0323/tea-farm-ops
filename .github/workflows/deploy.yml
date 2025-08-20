@@ -141,7 +141,7 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: postgres
 
       - name: Run E2E tests
-        run: npm run cypress:run
+        run: npm run test:e2e
         env:
           CYPRESS_baseUrl: http://localhost:3000
 

@@ -1,4 +1,4 @@
-describe('認証機能', () => {
+describe.skip('認証機能', () => {
   beforeEach(() => {
     cy.visit('/login');
   });

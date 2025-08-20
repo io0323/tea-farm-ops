@@ -373,9 +373,8 @@ jobs:
             fi
           done
           
-          # Use wait-on with root endpoint for more reliable detection
-          echo "Using wait-on with root endpoint..."
-          npx wait-on --httpTimeout 10000 --interval 1000 --verbose http://localhost:3000 --timeout 120000
+          # Frontend server readiness check completed via curl tests above
+          echo "Frontend server readiness check completed via curl tests above"
           echo "Frontend server is ready!"
           
           # Final check for any root user database connections

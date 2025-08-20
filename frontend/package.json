@@ -30,10 +30,11 @@
     "cypress": "^13.6.1",
     "jest": "^27.5.1",
     "jest-environment-jsdom": "^27.5.1",
+    "start-server-and-test": "^2.0.13",
     "ts-jest": "^27.1.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",

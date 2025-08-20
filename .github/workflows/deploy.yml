@@ -320,6 +320,11 @@ jobs:
         env:
           NODE_ENV: test
           REACT_APP_API_URL: http://localhost:8080
+          REACT_APP_AUTH_URL: http://localhost:8080/auth
+          REACT_APP_JWT_SECRET: test-secret-key
+          REACT_APP_JWT_EXPIRATION: 3600000
+          REACT_APP_TIMEOUT: 10000
+          REACT_APP_RETRY_ATTEMPTS: 3
           CI: true
 
       - name: Wait for frontend server

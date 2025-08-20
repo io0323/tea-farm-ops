@@ -258,7 +258,7 @@ jobs:
           echo "Starting npm start with detailed logging..."
           # Ensure server binds to all interfaces for CI environment
           echo "Starting frontend server with explicit binding..."
-          HOST=0.0.0.0 PORT=3000 npm run start > npm-start.log 2>&1 &
+          npm run start > npm-start.log 2>&1 &
           FRONTEND_PID=$!
           echo "Frontend server started with PID: $FRONTEND_PID"
           
@@ -355,9 +355,9 @@ jobs:
           # Try to connect to the server before wait-on with more attempts
           echo "Testing server connectivity..."
           for i in {1..8}; do
-            echo "Attempt $i: Testing http://localhost:3000/health.html..."
-            if curl -f http://localhost:3000/health.html > /dev/null 2>&1; then
-              echo "Server is responding on port 3000 with health check!"
+            echo "Attempt $i: Testing http://localhost:3000..."
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is responding on port 3000!"
               break
             else
               echo "Server not responding yet, waiting 15 seconds..."
@@ -365,9 +365,9 @@ jobs:
             fi
           done
           
-          # Use wait-on with health check endpoint for more reliable detection
-          echo "Using wait-on with health check endpoint..."
-          npx wait-on --httpTimeout 10000 --interval 1000 --verbose http://localhost:3000/health.html --timeout 120000
+          # Use wait-on with root endpoint for more reliable detection
+          echo "Using wait-on with root endpoint..."
+          npx wait-on --httpTimeout 10000 --interval 1000 --verbose http://localhost:3000 --timeout 120000
           echo "Frontend server is ready!"
           
           # Final check for any root user database connections
@@ -381,9 +381,7 @@ jobs:
         run: |
           echo "Verifying frontend server health..."
           echo "Testing main endpoint..."
-          curl -f http://localhost:3000 || echo "Main endpoint failed, but continuing..."
-          echo "Testing health check endpoint..."
-          curl -f http://localhost:3000/health.html || exit 1
+          curl -f http://localhost:3000 || exit 1
           echo "Frontend server is healthy!"
         env:
           NODE_ENV: test

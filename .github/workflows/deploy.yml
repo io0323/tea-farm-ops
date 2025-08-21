@@ -458,7 +458,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Extract metadata
         id: meta

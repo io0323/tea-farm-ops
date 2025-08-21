@@ -21,6 +21,9 @@
 | `DB_PASSWORD` | データベースパスワード | `strong-password-here` |
 | `JWT_SECRET` | JWT署名用シークレット | `your-jwt-secret-key` |
 | `GITHUB_TOKEN` | GitHub Personal Access Token | `ghp_xxxxxxxx` |
+| `GHCR_PAT` | GitHub Container Registry用Personal Access Token（組織パッケージpush用） | `ghp_xxxxxxxx` |
+
+**注意:** `GHCR_PAT` は組織のGitHub Container Registryにパッケージをpushするために必要です。デフォルトの `GITHUB_TOKEN` では組織レベルのパッケージ作成権限が不足するため、`write:packages` 権限を持つPersonal Access Tokenが必要です。
 
 ### オプションSecrets
 

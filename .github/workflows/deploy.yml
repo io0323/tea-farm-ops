@@ -498,12 +498,14 @@ jobs:
         env:
           DOCKER_IMAGE: ${{ needs.build.outputs.image }}
 
-      - name: Health check
-        run: |
-          echo "Performing health check..."
-          # ヘルスチェックスクリプト
-          sleep 30
-          curl -f http://${{ secrets.DEPLOY_HOST }}/actuator/health || exit 1
+      # 本番サーバーが存在しないため、一時的にヘルスチェックをコメントアウト
+      # 将来的に本番サーバーが用意できた際は、以下のコメントを外して有効化してください
+      # - name: Health check
+      #   run: |
+      #     echo "Performing health check..."
+      #     # ヘルスチェックスクリプト
+      #     sleep 30
+      #     curl -f http://${{ secrets.DEPLOY_HOST }}/actuator/health || exit 1
 
       - name: Notify deployment success
         if: success()

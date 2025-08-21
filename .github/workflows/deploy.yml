@@ -503,7 +503,7 @@ jobs:
           echo "Performing health check..."
           # ヘルスチェックスクリプト
           sleep 30
-          curl -f http://your-production-url/actuator/health || exit 1
+          curl -f http://${{ secrets.DEPLOY_HOST }}/actuator/health || exit 1
 
       - name: Notify deployment success
         if: success()

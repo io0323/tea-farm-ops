@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Field, FieldSearchParams } from '../../types';
-import apiClient from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { Field, FieldSearchParams } from "../../types";
+import apiClient from "../../services/api";
 
 // フィールド状態の型定義
 interface FieldState {
@@ -20,68 +20,81 @@ const initialState: FieldState = {
 
 // 非同期アクション
 export const fetchFields = createAsyncThunk(
-  'fields/fetchFields',
+  "fields/fetchFields",
   async (params?: FieldSearchParams, { rejectWithValue } = {} as any) => {
     try {
       const fields = await apiClient.getFields(params);
       return fields;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'フィールドの取得に失敗しました');
+      return rejectWithValue(
+        error.response?.data?.message || "フィールドの取得に失敗しました",
+      );
     }
-  }
+  },
 );
 
 export const fetchFieldById = createAsyncThunk(
-  'fields/fetchFieldById',
+  "fields/fetchFieldById",
   async (id: number, { rejectWithValue }) => {
     try {
       const field = await apiClient.getField(id);
       return field;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'フィールドの取得に失敗しました');
+      return rejectWithValue(
+        error.response?.data?.message || "フィールドの取得に失敗しました",
+      );
     }
-  }
+  },
 );
 
 export const createField = createAsyncThunk(
-  'fields/createField',
-  async (field: Omit<Field, 'id'>, { rejectWithValue }) => {
+  "fields/createField",
+  async (field: Omit<Field, "id">, { rejectWithValue }) => {
     try {
       const newField = await apiClient.createField(field);
       return newField;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'フィールドの作成に失敗しました');
+      return rejectWithValue(
+        error.response?.data?.message || "フィールドの作成に失敗しました",
+      );
     }
-  }
+  },
 );
 
 export const updateField = createAsyncThunk(
-  'fields/updateField',
-  async ({ id, field }: { id: number; field: Partial<Field> }, { rejectWithValue }) => {
+  "fields/updateField",
+  async (
+    { id, field }: { id: number; field: Partial<Field> },
+    { rejectWithValue },
+  ) => {
     try {
       const updatedField = await apiClient.updateField(id, field);
       return updatedField;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'フィールドの更新に失敗しました');
+      return rejectWithValue(
+        error.response?.data?.message || "フィールドの更新に失敗しました",
+      );
     }
-  }
+  },
 );
 
 export const deleteField = createAsyncThunk(
-  'fields/deleteField',
+  "fields/deleteField",
   async (id: number, { rejectWithValue }) => {
     try {
       await apiClient.deleteField(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'フィールドの削除に失敗しました');
+      return rejectWithValue(
+        error.response?.data?.message || "フィールドの削除に失敗しました",
+      );
     }
-  }
+  },
 );
 
 // スライス
 const fieldSlice = createSlice({
-  name: 'fields',
+  name: "fields",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -98,11 +111,14 @@ const fieldSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchFields.fulfilled, (state, action: PayloadAction<Field[]>) => {
-        state.loading = false;
-        state.fields = action.payload;
-        state.error = null;
-      })
+      .addCase(
+        fetchFields.fulfilled,
+        (state, action: PayloadAction<Field[]>) => {
+          state.loading = false;
+          state.fields = action.payload;
+          state.error = null;
+        },
+      )
       .addCase(fetchFields.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -112,11 +128,14 @@ const fieldSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchFieldById.fulfilled, (state, action: PayloadAction<Field>) => {
-        state.loading = false;
-        state.currentField = action.payload;
-        state.error = null;
-      })
+      .addCase(
+        fetchFieldById.fulfilled,
+        (state, action: PayloadAction<Field>) => {
+          state.loading = false;
+          state.currentField = action.payload;
+          state.error = null;
+        },
+      )
       .addCase(fetchFieldById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -142,7 +161,9 @@ const fieldSlice = createSlice({
       })
       .addCase(updateField.fulfilled, (state, action: PayloadAction<Field>) => {
         state.loading = false;
-        const index = state.fields.findIndex(field => field.id === action.payload.id);
+        const index = state.fields.findIndex(
+          (field) => field.id === action.payload.id,
+        );
         if (index !== -1) {
           state.fields[index] = action.payload;
         }
@@ -160,14 +181,19 @@ const fieldSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteField.fulfilled, (state, action: PayloadAction<number>) => {
-        state.loading = false;
-        state.fields = state.fields.filter(field => field.id !== action.payload);
-        if (state.currentField?.id === action.payload) {
-          state.currentField = null;
-        }
-        state.error = null;
-      })
+      .addCase(
+        deleteField.fulfilled,
+        (state, action: PayloadAction<number>) => {
+          state.loading = false;
+          state.fields = state.fields.filter(
+            (field) => field.id !== action.payload,
+          );
+          if (state.currentField?.id === action.payload) {
+            state.currentField = null;
+          }
+          state.error = null;
+        },
+      )
       .addCase(deleteField.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -176,4 +202,4 @@ const fieldSlice = createSlice({
 });
 
 export const { clearError, clearCurrentField } = fieldSlice.actions;
-export default fieldSlice.reducer; 
+export default fieldSlice.reducer;

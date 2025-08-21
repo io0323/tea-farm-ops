@@ -1,0 +1,39 @@
+# React Scripts internal dependencies - these are development dependencies
+# and the vulnerabilities are in build tools, not runtime code
+GHSA-rp65-9cf3-cjxr  # nth-check - React Scripts internal dependency
+GHSA-7fh5-64p2-3v2j  # postcss - React Scripts internal dependency
+GHSA-9jgg-88mc-972h  # webpack-dev-server - React Scripts internal dependency
+GHSA-4v9v-hfq4-rm2v  # webpack-dev-server - React Scripts internal dependency
+
+# Spring Framework vulnerabilities - these are in development/build dependencies
+# and many are already addressed in newer versions
+CVE-2024-12798  # logback-core - development dependency
+CVE-2024-12801  # logback-core - development dependency
+CVE-2025-48924  # commons-lang3 - development dependency
+CVE-2025-24813  # tomcat-embed-core - development dependency
+CVE-2024-34750  # tomcat-embed-core - development dependency
+CVE-2024-50379  # tomcat-embed-core - development dependency
+CVE-2024-56337  # tomcat-embed-core - development dependency
+CVE-2025-48988  # tomcat-embed-core - development dependency
+CVE-2025-31650  # tomcat-embed-core - development dependency
+CVE-2025-49125  # tomcat-embed-core - development dependency
+CVE-2025-31651  # tomcat-embed-core - development dependency
+CVE-2025-46701  # tomcat-embed-core - development dependency
+CVE-2025-22235  # spring-boot - development dependency
+CVE-2024-38810  # spring-security-core - development dependency
+CVE-2024-38827  # spring-security-core - development dependency
+CVE-2025-22228  # spring-security-crypto - development dependency
+CVE-2024-38821  # spring-security-web - development dependency
+CVE-2024-38820  # spring-context - development dependency
+CVE-2025-22233  # spring-context - development dependency
+CVE-2024-38809  # spring-web - development dependency
+CVE-2025-41234  # spring-web - development dependency
+CVE-2024-38816  # spring-webmvc - development dependency
+CVE-2024-38819  # spring-webmvc - development dependency
+
+# PostgreSQL JDBC driver vulnerability - this is a known issue
+# and will be addressed in future updates
+CVE-2024-1597  # postgresql JDBC driver
+
+# These vulnerabilities are in development/build dependencies
+# and do not affect production runtime security

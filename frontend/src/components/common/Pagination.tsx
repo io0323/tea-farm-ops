@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Pagination as MuiPagination,
@@ -7,7 +7,7 @@ import {
   MenuItem,
   Typography,
   SelectChangeEvent,
-} from '@mui/material';
+} from "@mui/material";
 
 interface PaginationProps {
   currentPage: number;
@@ -28,7 +28,10 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   onPageSizeChange,
 }) => {
-  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number,
+  ) => {
     onPageChange(page);
   };
 
@@ -44,19 +47,15 @@ const Pagination: React.FC<PaginationProps> = ({
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      sx={{ mt: 3, p: 2, backgroundColor: 'background.paper', borderRadius: 1 }}
+      sx={{ mt: 3, p: 2, backgroundColor: "background.paper", borderRadius: 1 }}
     >
       <Box display="flex" alignItems="center" gap={2}>
         <Typography variant="body2" color="text.secondary">
-          {totalItems > 0 ? `${startItem}-${endItem} / ${totalItems}件` : '0件'}
+          {totalItems > 0 ? `${startItem}-${endItem} / ${totalItems}件` : "0件"}
         </Typography>
-        
+
         <FormControl size="small" sx={{ minWidth: 80 }}>
-          <Select
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            displayEmpty
-          >
+          <Select value={pageSize} onChange={handlePageSizeChange} displayEmpty>
             {pageSizeOptions.map((size) => (
               <MenuItem key={size} value={size}>
                 {size}件
@@ -80,4 +79,4 @@ const Pagination: React.FC<PaginationProps> = ({
   );
 };
 
-export default Pagination; 
+export default Pagination;

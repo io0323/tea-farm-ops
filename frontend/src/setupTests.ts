@@ -2,29 +2,28 @@
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
-import { configure } from '@testing-library/react';
-import React from 'react';
+import "@testing-library/jest-dom";
+import { configure } from "@testing-library/react";
 
 // テストライブラリの設定
-configure({ testIdAttribute: 'data-testid' });
+configure({ testIdAttribute: "data-testid" });
 
 // Material-UIのモック
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
+jest.mock("@mui/material", () => ({
+  ...jest.requireActual("@mui/material"),
   useTheme: () => ({
     palette: {
-      mode: 'light',
-      primary: { main: '#2e7d32' },
-      secondary: { main: '#8bc34a' },
+      mode: "light",
+      primary: { main: "#2e7d32" },
+      secondary: { main: "#8bc34a" },
     },
-    typography: { fontFamily: 'Inter' },
+    typography: { fontFamily: "Inter" },
   }),
 }));
 
 // Reduxのモック
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock("react-redux", () => ({
+  ...jest.requireActual("react-redux"),
   useSelector: jest.fn(),
   useDispatch: jest.fn(),
 }));
@@ -61,8 +60,9 @@ const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: any[]) => {
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      typeof args[0] === "string" &&
+      (args[0].includes("Warning: ReactDOM.render is no longer supported") ||
+        args[0].includes("Warning: `ReactDOMTestUtils.act` is deprecated"))
     ) {
       return;
     }

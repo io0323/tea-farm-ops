@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 import {
   Card,
   CardContent,
   Typography,
   Box,
   LinearProgress,
-} from '@mui/material';
-import { SvgIconComponent } from '@mui/icons-material';
+} from "@mui/material";
+import { SvgIconComponent } from "@mui/icons-material";
 
 interface StatisticsCardProps {
   title: string;
@@ -31,14 +31,22 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({
   trend,
 }) => {
   return (
-    <Card sx={{ height: '100%', position: 'relative', overflow: 'visible' }}>
+    <Card sx={{ height: "100%", position: "relative", overflow: "visible" }}>
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="flex-start"
+        >
           <Box flex={1}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {title}
             </Typography>
-            <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1 }}>
+            <Typography
+              variant="h4"
+              component="div"
+              sx={{ fontWeight: "bold", mb: 1 }}
+            >
               {value}
             </Typography>
             {subtitle && (
@@ -50,10 +58,11 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({
               <Box display="flex" alignItems="center" gap={0.5} sx={{ mt: 1 }}>
                 <Typography
                   variant="body2"
-                  color={trend.isPositive ? 'success.main' : 'error.main'}
-                  sx={{ fontWeight: 'bold' }}
+                  color={trend.isPositive ? "success.main" : "error.main"}
+                  sx={{ fontWeight: "bold" }}
                 >
-                  {trend.isPositive ? '+' : ''}{trend.value}%
+                  {trend.isPositive ? "+" : ""}
+                  {trend.value}%
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   前月比
@@ -64,22 +73,27 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({
           <Box
             sx={{
               backgroundColor: color,
-              borderRadius: '50%',
+              borderRadius: "50%",
               width: 48,
               height: 48,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
             }}
           >
             {icon}
           </Box>
         </Box>
-        
+
         {progress !== undefined && (
           <Box sx={{ mt: 2 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 1 }}
+            >
               <Typography variant="body2" color="text.secondary">
                 進捗
               </Typography>
@@ -93,8 +107,8 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({
               sx={{
                 height: 6,
                 borderRadius: 3,
-                backgroundColor: 'grey.200',
-                '& .MuiLinearProgress-bar': {
+                backgroundColor: "grey.200",
+                "& .MuiLinearProgress-bar": {
                   backgroundColor: color,
                   borderRadius: 3,
                 },
@@ -107,4 +121,4 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({
   );
 };
 
-export default StatisticsCard; 
+export default StatisticsCard;

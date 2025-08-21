@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,11 +12,15 @@ import {
   MenuItem,
   Alert,
   Box,
-} from '@mui/material';
-import { HarvestRecord, TeaGrade } from '../../types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { createHarvestRecord, updateHarvestRecord, clearError } from '../../store/slices/harvestRecordSlice';
-import { fetchFields } from '../../store/slices/fieldSlice';
+} from "@mui/material";
+import { HarvestRecord, TeaGrade } from "../../types";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import {
+  createHarvestRecord,
+  updateHarvestRecord,
+  clearError,
+} from "../../store/slices/harvestRecordSlice";
+import { fetchFields } from "../../store/slices/fieldSlice";
 
 interface HarvestRecordFormProps {
   open: boolean;
@@ -24,17 +28,21 @@ interface HarvestRecordFormProps {
   record?: HarvestRecord | null;
 }
 
-const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, record }) => {
+const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({
+  open,
+  onClose,
+  record,
+}) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.harvestRecords);
   const { fields } = useAppSelector((state) => state.fields);
 
   const [formData, setFormData] = useState({
-    fieldId: '',
-    harvestDate: '',
-    quantityKg: '',
-    teaGrade: '',
-    notes: '',
+    fieldId: "",
+    harvestDate: "",
+    quantityKg: "",
+    teaGrade: "",
+    notes: "",
   });
 
   const isEdit = !!record;
@@ -51,15 +59,15 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
         harvestDate: record.harvestDate,
         quantityKg: record.quantityKg.toString(),
         teaGrade: record.teaGrade,
-        notes: record.notes || '',
+        notes: record.notes || "",
       });
     } else {
       setFormData({
-        fieldId: '',
-        harvestDate: '',
-        quantityKg: '',
-        teaGrade: '',
-        notes: '',
+        fieldId: "",
+        harvestDate: "",
+        quantityKg: "",
+        teaGrade: "",
+        notes: "",
       });
     }
   }, [record]);
@@ -70,9 +78,13 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
     }
   }, [open, dispatch]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } },
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -80,8 +92,10 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const selectedField = fields.find(f => f.id.toString() === formData.fieldId);
+
+    const selectedField = fields.find(
+      (f) => f.id.toString() === formData.fieldId,
+    );
     if (!selectedField) {
       return;
     }
@@ -96,7 +110,9 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
     };
 
     if (isEdit && record) {
-      await dispatch(updateHarvestRecord({ id: record.id, record: recordData }));
+      await dispatch(
+        updateHarvestRecord({ id: record.id, record: recordData }),
+      );
     } else {
       await dispatch(createHarvestRecord(recordData));
     }
@@ -108,10 +124,8 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {isEdit ? '収穫記録編集' : '新規収穫記録作成'}
-      </DialogTitle>
-      
+      <DialogTitle>{isEdit ? "収穫記録編集" : "新規収穫記録作成"}</DialogTitle>
+
       <form onSubmit={handleSubmit}>
         <DialogContent>
           {error && (
@@ -120,7 +134,13 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
             </Alert>
           )}
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             <FormControl fullWidth margin="normal">
               <InputLabel>フィールド</InputLabel>
               <Select
@@ -191,21 +211,15 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
               multiline
               rows={3}
               margin="normal"
-              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+              sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}
             />
           </Box>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>
-            キャンセル
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-          >
-            {loading ? '保存中...' : (isEdit ? '更新' : '作成')}
+          <Button onClick={onClose}>キャンセル</Button>
+          <Button type="submit" variant="contained" disabled={loading}>
+            {loading ? "保存中..." : isEdit ? "更新" : "作成"}
           </Button>
         </DialogActions>
       </form>
@@ -213,4 +227,4 @@ const HarvestRecordForm: React.FC<HarvestRecordFormProps> = ({ open, onClose, re
   );
 };
 
-export default HarvestRecordForm; 
+export default HarvestRecordForm;

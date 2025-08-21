@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,10 +7,13 @@ import {
   Button,
   Typography,
   Alert,
-} from '@mui/material';
-import { HarvestRecord } from '../../types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { deleteHarvestRecord, clearError } from '../../store/slices/harvestRecordSlice';
+} from "@mui/material";
+import { HarvestRecord } from "../../types";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import {
+  deleteHarvestRecord,
+  clearError,
+} from "../../store/slices/harvestRecordSlice";
 
 interface DeleteHarvestRecordDialogProps {
   open: boolean;
@@ -18,7 +21,11 @@ interface DeleteHarvestRecordDialogProps {
   record: HarvestRecord | null;
 }
 
-const DeleteHarvestRecordDialog: React.FC<DeleteHarvestRecordDialogProps> = ({ open, onClose, record }) => {
+const DeleteHarvestRecordDialog: React.FC<DeleteHarvestRecordDialogProps> = ({
+  open,
+  onClose,
+  record,
+}) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.harvestRecords);
 
@@ -41,10 +48,8 @@ const DeleteHarvestRecordDialog: React.FC<DeleteHarvestRecordDialogProps> = ({ o
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        収穫記録削除確認
-      </DialogTitle>
-      
+      <DialogTitle>収穫記録削除確認</DialogTitle>
+
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -59,10 +64,12 @@ const DeleteHarvestRecordDialog: React.FC<DeleteHarvestRecordDialogProps> = ({ o
         <Typography variant="h6" sx={{ mb: 1 }}>
           {record.teaGrade} - {record.quantityKg}kg
         </Typography>
-        
+
         <Typography variant="body2" color="text.secondary">
-          収穫日: {record.harvestDate}<br />
-          茶葉グレード: {record.teaGrade}<br />
+          収穫日: {record.harvestDate}
+          <br />
+          茶葉グレード: {record.teaGrade}
+          <br />
           収穫量: {record.quantityKg}kg
         </Typography>
 
@@ -81,11 +88,11 @@ const DeleteHarvestRecordDialog: React.FC<DeleteHarvestRecordDialogProps> = ({ o
           variant="contained"
           disabled={loading}
         >
-          {loading ? '削除中...' : '削除'}
+          {loading ? "削除中..." : "削除"}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default DeleteHarvestRecordDialog; 
+export default DeleteHarvestRecordDialog;

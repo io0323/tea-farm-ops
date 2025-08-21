@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,11 +12,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
-} from '@mui/material';
-import { WeatherObservation } from '../../types';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { createWeatherObservation, updateWeatherObservation, clearError } from '../../store/slices/weatherObservationSlice';
-import { fetchFields } from '../../store/slices/fieldSlice';
+} from "@mui/material";
+import { WeatherObservation } from "../../types";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import {
+  createWeatherObservation,
+  updateWeatherObservation,
+  clearError,
+} from "../../store/slices/weatherObservationSlice";
+import { fetchFields } from "../../store/slices/fieldSlice";
 
 interface WeatherObservationFormProps {
   open: boolean;
@@ -24,19 +28,25 @@ interface WeatherObservationFormProps {
   observation?: WeatherObservation | null;
 }
 
-const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, onClose, observation }) => {
+const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({
+  open,
+  onClose,
+  observation,
+}) => {
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.weatherObservations);
+  const { loading, error } = useAppSelector(
+    (state) => state.weatherObservations,
+  );
   const { fields } = useAppSelector((state) => state.fields);
 
   const [formData, setFormData] = useState({
-    fieldId: '',
-    date: '',
-    temperature: '',
-    rainfall: '',
-    humidity: '',
-    pestsSeen: '',
-    notes: '',
+    fieldId: "",
+    date: "",
+    temperature: "",
+    rainfall: "",
+    humidity: "",
+    pestsSeen: "",
+    notes: "",
   });
 
   const isEdit = !!observation;
@@ -54,18 +64,18 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
         temperature: observation.temperature.toString(),
         rainfall: observation.rainfall.toString(),
         humidity: observation.humidity.toString(),
-        pestsSeen: observation.pestsSeen || '',
-        notes: observation.notes || '',
+        pestsSeen: observation.pestsSeen || "",
+        notes: observation.notes || "",
       });
     } else {
       setFormData({
-        fieldId: '',
-        date: '',
-        temperature: '',
-        rainfall: '',
-        humidity: '',
-        pestsSeen: '',
-        notes: '',
+        fieldId: "",
+        date: "",
+        temperature: "",
+        rainfall: "",
+        humidity: "",
+        pestsSeen: "",
+        notes: "",
       });
     }
   }, [observation]);
@@ -76,9 +86,13 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
     }
   }, [open, dispatch]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } },
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -86,8 +100,10 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const selectedField = fields.find(f => f.id.toString() === formData.fieldId);
+
+    const selectedField = fields.find(
+      (f) => f.id.toString() === formData.fieldId,
+    );
     if (!selectedField) {
       return;
     }
@@ -104,7 +120,12 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
     };
 
     if (isEdit && observation) {
-      await dispatch(updateWeatherObservation({ id: observation.id, observation: observationData }));
+      await dispatch(
+        updateWeatherObservation({
+          id: observation.id,
+          observation: observationData,
+        }),
+      );
     } else {
       await dispatch(createWeatherObservation(observationData));
     }
@@ -116,10 +137,8 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {isEdit ? '天候観測編集' : '新規天候観測作成'}
-      </DialogTitle>
-      
+      <DialogTitle>{isEdit ? "天候観測編集" : "新規天候観測作成"}</DialogTitle>
+
       <form onSubmit={handleSubmit}>
         <DialogContent>
           {error && (
@@ -128,7 +147,13 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
             </Alert>
           )}
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             <FormControl fullWidth margin="normal">
               <InputLabel>フィールド</InputLabel>
               <Select
@@ -205,7 +230,7 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
               onChange={handleChange}
               margin="normal"
               placeholder="例: アブラムシ、カメムシなど"
-              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+              sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}
             />
 
             <TextField
@@ -217,21 +242,15 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
               multiline
               rows={3}
               margin="normal"
-              sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
+              sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}
             />
           </Box>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>
-            キャンセル
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-          >
-            {loading ? '保存中...' : (isEdit ? '更新' : '作成')}
+          <Button onClick={onClose}>キャンセル</Button>
+          <Button type="submit" variant="contained" disabled={loading}>
+            {loading ? "保存中..." : isEdit ? "更新" : "作成"}
           </Button>
         </DialogActions>
       </form>
@@ -239,4 +258,4 @@ const WeatherObservationForm: React.FC<WeatherObservationFormProps> = ({ open, o
   );
 };
 
-export default WeatherObservationForm; 
+export default WeatherObservationForm;

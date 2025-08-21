@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import {
   Field,
   Task,
@@ -11,11 +11,12 @@ import {
   FieldSearchParams,
   TaskSearchParams,
   HarvestRecordSearchParams,
-  WeatherObservationSearchParams
-} from '../types';
+  WeatherObservationSearchParams,
+} from "../types";
 
 // API クライアントの設定
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -24,14 +25,14 @@ class ApiClient {
     this.client = axios.create({
       baseURL: API_BASE_URL,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     // リクエストインターセプター（認証トークンの追加）
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem("authToken");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -39,7 +40,7 @@ class ApiClient {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // レスポンスインターセプター（エラーハンドリング）
@@ -47,56 +48,70 @@ class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
   // 認証関連
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response: AxiosResponse<LoginResponse> = await this.client.post('/auth/login', credentials);
+    const response: AxiosResponse<LoginResponse> = await this.client.post(
+      "/auth/login",
+      credentials,
+    );
     return response.data;
   }
 
   async logout(): Promise<void> {
-    await this.client.post('/auth/logout');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    await this.client.post("/auth/logout");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
   }
 
   async getCurrentUser(): Promise<User> {
-    const response: AxiosResponse<User> = await this.client.get('/auth/me');
+    const response: AxiosResponse<User> = await this.client.get("/auth/me");
     return response.data;
   }
 
   // ダッシュボード
   async getDashboardStats(): Promise<DashboardStats> {
-    const response: AxiosResponse<DashboardStats> = await this.client.get('/dashboard/stats');
+    const response: AxiosResponse<DashboardStats> =
+      await this.client.get("/dashboard/stats");
     return response.data;
   }
 
   // フィールド関連
   async getFields(params?: FieldSearchParams): Promise<Field[]> {
-    const response: AxiosResponse<Field[]> = await this.client.get('/fields', { params });
+    const response: AxiosResponse<Field[]> = await this.client.get("/fields", {
+      params,
+    });
     return response.data;
   }
 
   async getField(id: number): Promise<Field> {
-    const response: AxiosResponse<Field> = await this.client.get(`/fields/${id}`);
+    const response: AxiosResponse<Field> = await this.client.get(
+      `/fields/${id}`,
+    );
     return response.data;
   }
 
-  async createField(field: Omit<Field, 'id'>): Promise<Field> {
-    const response: AxiosResponse<Field> = await this.client.post('/fields', field);
+  async createField(field: Omit<Field, "id">): Promise<Field> {
+    const response: AxiosResponse<Field> = await this.client.post(
+      "/fields",
+      field,
+    );
     return response.data;
   }
 
   async updateField(id: number, field: Partial<Field>): Promise<Field> {
-    const response: AxiosResponse<Field> = await this.client.put(`/fields/${id}`, field);
+    const response: AxiosResponse<Field> = await this.client.put(
+      `/fields/${id}`,
+      field,
+    );
     return response.data;
   }
 
@@ -106,7 +121,9 @@ class ApiClient {
 
   // タスク関連
   async getTasks(params?: TaskSearchParams): Promise<Task[]> {
-    const response: AxiosResponse<Task[]> = await this.client.get('/tasks', { params });
+    const response: AxiosResponse<Task[]> = await this.client.get("/tasks", {
+      params,
+    });
     return response.data;
   }
 
@@ -115,13 +132,19 @@ class ApiClient {
     return response.data;
   }
 
-  async createTask(task: Omit<Task, 'id'>): Promise<Task> {
-    const response: AxiosResponse<Task> = await this.client.post('/tasks', task);
+  async createTask(task: Omit<Task, "id">): Promise<Task> {
+    const response: AxiosResponse<Task> = await this.client.post(
+      "/tasks",
+      task,
+    );
     return response.data;
   }
 
   async updateTask(id: number, task: Partial<Task>): Promise<Task> {
-    const response: AxiosResponse<Task> = await this.client.put(`/tasks/${id}`, task);
+    const response: AxiosResponse<Task> = await this.client.put(
+      `/tasks/${id}`,
+      task,
+    );
     return response.data;
   }
 
@@ -130,23 +153,41 @@ class ApiClient {
   }
 
   // 収穫記録関連
-  async getHarvestRecords(params?: HarvestRecordSearchParams): Promise<HarvestRecord[]> {
-    const response: AxiosResponse<HarvestRecord[]> = await this.client.get('/harvest-records', { params });
+  async getHarvestRecords(
+    params?: HarvestRecordSearchParams,
+  ): Promise<HarvestRecord[]> {
+    const response: AxiosResponse<HarvestRecord[]> = await this.client.get(
+      "/harvest-records",
+      { params },
+    );
     return response.data;
   }
 
   async getHarvestRecord(id: number): Promise<HarvestRecord> {
-    const response: AxiosResponse<HarvestRecord> = await this.client.get(`/harvest-records/${id}`);
+    const response: AxiosResponse<HarvestRecord> = await this.client.get(
+      `/harvest-records/${id}`,
+    );
     return response.data;
   }
 
-  async createHarvestRecord(record: Omit<HarvestRecord, 'id'>): Promise<HarvestRecord> {
-    const response: AxiosResponse<HarvestRecord> = await this.client.post('/harvest-records', record);
+  async createHarvestRecord(
+    record: Omit<HarvestRecord, "id">,
+  ): Promise<HarvestRecord> {
+    const response: AxiosResponse<HarvestRecord> = await this.client.post(
+      "/harvest-records",
+      record,
+    );
     return response.data;
   }
 
-  async updateHarvestRecord(id: number, record: Partial<HarvestRecord>): Promise<HarvestRecord> {
-    const response: AxiosResponse<HarvestRecord> = await this.client.put(`/harvest-records/${id}`, record);
+  async updateHarvestRecord(
+    id: number,
+    record: Partial<HarvestRecord>,
+  ): Promise<HarvestRecord> {
+    const response: AxiosResponse<HarvestRecord> = await this.client.put(
+      `/harvest-records/${id}`,
+      record,
+    );
     return response.data;
   }
 
@@ -155,23 +196,41 @@ class ApiClient {
   }
 
   // 天候観測関連
-  async getWeatherObservations(params?: WeatherObservationSearchParams): Promise<WeatherObservation[]> {
-    const response: AxiosResponse<WeatherObservation[]> = await this.client.get('/weather-observations', { params });
+  async getWeatherObservations(
+    params?: WeatherObservationSearchParams,
+  ): Promise<WeatherObservation[]> {
+    const response: AxiosResponse<WeatherObservation[]> = await this.client.get(
+      "/weather-observations",
+      { params },
+    );
     return response.data;
   }
 
   async getWeatherObservation(id: number): Promise<WeatherObservation> {
-    const response: AxiosResponse<WeatherObservation> = await this.client.get(`/weather-observations/${id}`);
+    const response: AxiosResponse<WeatherObservation> = await this.client.get(
+      `/weather-observations/${id}`,
+    );
     return response.data;
   }
 
-  async createWeatherObservation(observation: Omit<WeatherObservation, 'id'>): Promise<WeatherObservation> {
-    const response: AxiosResponse<WeatherObservation> = await this.client.post('/weather-observations', observation);
+  async createWeatherObservation(
+    observation: Omit<WeatherObservation, "id">,
+  ): Promise<WeatherObservation> {
+    const response: AxiosResponse<WeatherObservation> = await this.client.post(
+      "/weather-observations",
+      observation,
+    );
     return response.data;
   }
 
-  async updateWeatherObservation(id: number, observation: Partial<WeatherObservation>): Promise<WeatherObservation> {
-    const response: AxiosResponse<WeatherObservation> = await this.client.put(`/weather-observations/${id}`, observation);
+  async updateWeatherObservation(
+    id: number,
+    observation: Partial<WeatherObservation>,
+  ): Promise<WeatherObservation> {
+    const response: AxiosResponse<WeatherObservation> = await this.client.put(
+      `/weather-observations/${id}`,
+      observation,
+    );
     return response.data;
   }
 
@@ -182,4 +241,4 @@ class ApiClient {
 
 // シングルトンインスタンス
 export const apiClient = new ApiClient();
-export default apiClient; 
+export default apiClient;

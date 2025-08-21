@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import React, { useEffect, useCallback, useRef } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 
 interface UseDataFetchingOptions {
   fetchAction: any;
@@ -54,7 +54,7 @@ export const useDataFetching = ({
     if (autoFetch) {
       fetchData();
     }
-  }, [autoFetch, fetchData, ...dependencies]);
+  }, [autoFetch, fetchData, dependencies]);
 
   useEffect(() => {
     return () => {
@@ -79,14 +79,14 @@ export const useDataFetching = ({
 export const useInfiniteScroll = (
   callback: () => void,
   hasMore: boolean,
-  loading: boolean
+  loading: boolean,
 ) => {
   const observerRef = useRef<IntersectionObserver | undefined>(undefined);
 
   const lastElementRef = useCallback(
     (node: HTMLElement | null) => {
       if (loading) return;
-      
+
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
@@ -101,7 +101,7 @@ export const useInfiniteScroll = (
         observerRef.current.observe(node);
       }
     },
-    [loading, hasMore, callback]
+    [loading, hasMore, callback],
   );
 
   useEffect(() => {
@@ -131,7 +131,8 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      const valueToStore =
+        value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
@@ -140,4 +141,4 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
   };
 
   return [storedValue, setValue] as const;
-}; 
+};

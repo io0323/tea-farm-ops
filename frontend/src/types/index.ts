@@ -12,20 +12,20 @@ export interface Field {
 
 // タスク関連の型定義
 export enum TaskStatus {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  PENDING = "PENDING",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 export enum TaskType {
-  PLANTING = 'PLANTING',
-  FERTILIZING = 'FERTILIZING',
-  PEST_CONTROL = 'PEST_CONTROL',
-  HARVESTING = 'HARVESTING',
-  PRUNING = 'PRUNING',
-  IRRIGATION = 'IRRIGATION',
-  OTHER = 'OTHER'
+  PLANTING = "PLANTING",
+  FERTILIZING = "FERTILIZING",
+  PEST_CONTROL = "PEST_CONTROL",
+  HARVESTING = "HARVESTING",
+  PRUNING = "PRUNING",
+  IRRIGATION = "IRRIGATION",
+  OTHER = "OTHER",
 }
 
 export interface Task {
@@ -44,10 +44,10 @@ export interface Task {
 
 // 収穫記録関連の型定義
 export enum TeaGrade {
-  PREMIUM = 'PREMIUM',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  STANDARD = 'STANDARD'
+  PREMIUM = "PREMIUM",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  STANDARD = "STANDARD",
 }
 
 export interface HarvestRecord {
@@ -96,7 +96,7 @@ export interface DashboardStats {
 export interface User {
   id: number;
   username: string;
-  role: 'ADMIN' | 'WORKER';
+  role: "ADMIN" | "WORKER";
   email?: string;
 }
 
@@ -151,4 +151,4 @@ export interface WeatherObservationSearchParams {
   startDate?: string;
   endDate?: string;
   fieldId?: number;
-} 
+}
